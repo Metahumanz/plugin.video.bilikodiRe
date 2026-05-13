@@ -13,10 +13,10 @@ try:
 except AttributeError:
     pass
 
-bili = Plugin()
+bili = c.bili
 
 # version
-version = "v1.0.13"
+version = "v1.0.16"
 debug = True
 
 
@@ -25,11 +25,14 @@ debug = True
 def passfunc():
     pass
 
+###############
 # 主页功能
+###############
 @bili.route("/")
 def index():
+    c.init()
     items = [
-      # {"label": "首页推荐", "path": bili.url_for("main_home")},
+      {"label": "首页推荐", "path": bili.url_for("feed_home", page=1)},
       # {"label": "我的账号", "path": bili.url_for("user")},
       {"label": "插件设置", "path": bili.url_for("open_set")},
       {"label": "登录帐号", "path": bili.url_for("login_qrcode")},
@@ -37,6 +40,88 @@ def index():
     ]
     return items
 
+@bili.route("/feed_home/<page>")
+def feed_home(page):
+    items = []
+    params = {"fresh_idx": int(page), "ps": 20}
+    params = ts.dict2url(params)
+    res = c.getjson("/x/web-interface/wbi/index/top/feed/rcmd?", params=params)
+    for x in res["data"]["item"]:
+        if not x["bvid"]:
+            continue
+        items.append(c.get_viditem(x))
+    items.append({"label": ts.ctxt(f"下一页 (目前在第 {page} 页)", color="yellow"), "path": bili.url_for("feed_home", page=int(page)+1)})
+    return items
+
+########################
+# PlayVideo
+@bili.route("/bvplay/<bv>/<cid>")
+def bvplay(bv, cid):
+    legacy_mode = True
+    if cid == 0:
+        res = c.getjson("/x/web-interface/view", params=ts.dict2url({"bvid": bv}))
+        if res["data"]["code"] == 0:
+            xbmcgui.Dialog().ok("Error", "无法获取视频 cid")
+            return
+        cid = res["data"]['pages'][0]['cid']
+    
+    url = "/x/player/playurl"
+    qn = 64
+    params = {
+        'bvid': bv,
+        'cid': cid,
+        'qn': qn,
+        'fnval': 4048,
+        'fourk': 1,
+        # "platform": "html5"
+    }
+    if legacy_mode:
+        params = {
+            'bvid': bv,
+            'cid': cid,
+            'qn': qn,
+            'fnval': 1,
+            'platform': 'html5'
+        }
+    # if legacy_mode: params["platform"] = "html5"
+    params = srt.getwbikey(params)
+    res = c.getjson(url, params=ts.dict2url(params))
+    
+    # code
+    if res["code"] != 0:
+        xbmcgui.Dialog().ok("Error", f"{res['code']}: {res['message']}")
+        return
+    
+    resu = res["data"]
+    
+    # Dash format
+    if "dash" in resu:
+        mpd = ts.genmpd(resu["dash"])
+        mpdpath = os.path.join(c.temp_dir, f"{cid}.mpd")
+        resu2 = False
+        with open(mpdpath, "w") as f:
+            resu2 = f.write(mpd)
+        if resu2 == False:
+            xbmcgui.Dialog().ok("Error", "写入mpd文件失败")
+            return
+        
+        video_url = {
+            'path': 'file://{}'.format(mpdpath),
+            'properties': {
+                'inputstream': 'inputstream.adaptive',
+                'inputstream.adaptive.manifest_type': 'mpd',
+                'inputstream.adaptive.manifest_headers': 'Referer=https://www.bilibili.com',
+                'inputstream.adaptive.stream_headers': 'Referer=https://www.bilibili.com'
+            }
+        }
+    
+    # mp4 h264 format
+    if 'durl' in resu:
+        video_url = resu["durl"][0]["url"]
+        
+    bili.set_resolved_url(video_url)
+    
+########################
 # Login
 @bili.route("/login_qrcode/")
 def login_qrcode():

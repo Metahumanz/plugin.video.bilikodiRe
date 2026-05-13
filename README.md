@@ -22,6 +22,9 @@ Bilikodi 的精神续作
    - 二维码登录
    - 快捷导入/导出 Cookie [如何快速通过导入 Cookie 登录](docs/login_local.md)
  - 首页推荐
+ - 视频/稿件播放
+   - Dash (1080+) \[beta\]
+   - Legacy mp4 (旧版 Bilikodi 方案, 最高 720p)
 # 鸣谢和声明
 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) - 收集了大量的b站api用于本插件的运作（bro已经没了😭）  
 [chen310/plugin.video.bili](https://github.com/chen310/plugin.video.bili) - 代码参考  

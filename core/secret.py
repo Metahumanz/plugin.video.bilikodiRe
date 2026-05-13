@@ -7,17 +7,25 @@ from xbmcswift2 import Plugin
 
 from functools import reduce
 from hashlib import md5
-import urllib.parse
 import time
+import urllib.parse
 
 bili = Plugin()
-
 
 def get_cooks():
     return bili.get_storage("user")["cookies"]
 
 def get_refkey():
     return bili.get_storage("user")["refkey"]
+
+def get_cookie_value(key):
+    cookie = get_cook()
+    if key in cookie:
+        return cookie[key]
+    return ''
+
+def get_uid():
+    return get_cookie_value('DedeUserID') or '0'
 
 ###########
 # Wbi Sign
@@ -56,7 +64,7 @@ def getWbiKeys() -> tuple[str, str]:
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
         'Referer': 'https://www.bilibili.com/'
     }
-    resp = requests.get('https://api.bilibili.com/x/web-interface/nav', headers=headers)
+    resp = r.get('https://api.bilibili.com/x/web-interface/nav', headers=headers)
     resp.raise_for_status()
     json_content = resp.json()
     img_url: str = json_content['data']['wbi_img']['img_url']
@@ -69,9 +77,10 @@ def getWbiKeys() -> tuple[str, str]:
 Wbi Sign 
 """
 def getwbikey(params):
-    a, b = getWbikeys()
+    img_key, sub_key = getWbiKeys()
     return encWbi(
         params=params,
-        img_key=a,
-        sub_key=b
+        img_key=img_key,
+        sub_key=sub_key
     )
+    
