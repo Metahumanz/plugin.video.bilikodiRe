@@ -1,4 +1,8 @@
-# Bilikodi Reborn Entry
+###############################
+#     Bilikodi Reborn addon.py
+#   插件入口
+#   原来的写的太神作了我想，所以重构了qwq
+###############################
 import json, os, time
 import requests as r
 # Core
@@ -16,9 +20,8 @@ except AttributeError:
 bili = c.bili
 
 # version
-version = "v1.0.16"
+version = "v1.0.21"
 debug = True
-
 
 # passfunc
 @bili.route("/pass/")
@@ -26,24 +29,30 @@ def passfunc():
     pass
 
 ###############
-# 主页功能
+# 主页路由
 ###############
 @bili.route("/")
 def index():
     c.init()
-    items = [
+    i = [
       {"label": "首页推荐", "path": bili.url_for("feed_home", page=1)},
+      {"label": "我的收藏夹", "path": bili.url_for("user_fav", uid=srt.get_uid())},
       # {"label": "我的账号", "path": bili.url_for("user")},
       {"label": "插件设置", "path": bili.url_for("open_set")},
-      {"label": "登录帐号", "path": bili.url_for("login_qrcode")},
+      # {"label": "登录帐号", "path": bili.url_for("login_qrcode")},
       {"label": "Bilikodi Reborn 帮助", "path": bili.url_for('help')},
+    #  {"label": "大家好我是棍母"}
     ]
+    items = []
+    for x in i:
+        items.append(c.temp_item(x))
+    
     return items
 
 @bili.route("/feed_home/<page>")
 def feed_home(page):
     items = []
-    params = {"fresh_idx": int(page), "ps": 20}
+    params = {"fresh_type": ts.getSet("home_fresh"), "fresh_idx": int(page), "ps": 20}
     params = ts.dict2url(params)
     res = c.getjson("/x/web-interface/wbi/index/top/feed/rcmd?", params=params)
     for x in res["data"]["item"]:
@@ -54,7 +63,86 @@ def feed_home(page):
     return items
 
 ########################
-# PlayVideo
+#  User/用户/Up主 路由
+@bili.route("/user/<uid>")
+def user_page(uid):
+    pass
+
+
+# 收藏
+@bili.route("/fav_folder/<uid>")
+def user_fav(uid):
+    params = ts.dict2url({"up_mid": int(uid)})
+    res = c.getjson("/x/v3/fav/folder/created/list-all", params=params)
+    if not res: return
+    if res["code"] != 0:
+        xbmcgui.Dialog().ok("Error", f"{res['code']}: {res['message']}")
+        return
+    
+    items = []
+    for x in res["data"]["list"]:
+        idx = x["id"]
+        params=ts.dict2url({"media_id": int(idx)})
+        info = c.getjson("/x/v3/fav/folder/info", params=params)
+        if not res: continue
+        if res["code"] != 0: continue
+        
+        plot = ""
+        i = info["data"]
+        up = i["upper"]
+        plot += f"By {up['name']} ({up['mid']})\n"
+        plot += f"创建时间: {ts.ts2date(i['ctime'])}\n"
+        plot += f"已收藏 {i['media_count']} 个视频\n"
+        plot += "\n\n"
+        plot += i["intro"]
+        
+        items.append({
+           "label": i["title"],
+           "icon": i["cover"],
+           "fanart": i["cover"],
+           "path": bili.url_for("fav_con", mlid=idx, page=1),
+           "info": {
+              "plot": plot
+           }
+        })
+    return items
+
+# 收藏夹内容
+@bili.route("/fav_content/<mlid>/<page>")
+def fav_con(mlid, page):
+    page = int(page)
+    params = ts.dict2url({
+        "media_id": int(mlid),
+        "order": "mtime",
+        "ps": 15,
+        "pn": page
+    })
+    res = c.getjson("/x/v3/fav/resource/list", params=params)
+    if not res: return
+    if res["code"] != 0:
+        xbmcgui.Dialog().ok("Error", f"{res['code']}: {res['message']}")
+        return
+    
+    items = []
+    res = res["data"]
+    next_page = res["has_more"]
+    
+    for x in res["medias"]:
+        if x["type"] != 2: continue
+        items.append(c.get_viditem(x))
+    
+    # 下一页逻辑
+    if next_page:
+        items.append(c.temp_item({
+            "label": ts.ctxt("下一页", color="yellow"),
+            "path": bili.url_for("fav_con", mlid=int(mlid), page=page+1)
+        }))
+    
+    return items
+
+
+########################
+# PlayVideo 路由
 @bili.route("/bvplay/<bv>/<cid>")
 def bvplay(bv, cid):
     legacy_mode = True
@@ -118,7 +206,8 @@ def bvplay(bv, cid):
     # mp4 h264 format
     if 'durl' in resu:
         video_url = resu["durl"][0]["url"]
-        
+    
+    c.rec_history(bv, cid)  
     bili.set_resolved_url(video_url)
     
 ########################
@@ -179,6 +268,13 @@ def login_local():
         user.sync()
         # refkey
         xbmcgui.Dialog().ok("Good Work!", "此 Cookie 可用! you did very well\n为保证账户安全，请及时删除 插件根目录的cookies.json 防止盗号")
+
+@bili.route("/check_login/")
+def check_login():
+    if c.check_login():
+        xbmcgui.Dialog().ok("Good", "您已登录")
+    else:
+        xbmcgui.Dialog().ok("Bad", "您还没登录")
 
 
 @bili.route('/open_set/')

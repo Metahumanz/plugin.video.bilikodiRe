@@ -1,7 +1,10 @@
 from datetime import datetime
-import xbmc, xbmcplugin, os
+import xbmc, xbmcplugin, os, sys
 import pyqrcode as qr
 import urllib.parse
+
+from xbmcswift2 import Plugin
+bili = Plugin()
 
 def qrgen(url, path):
     qrc = qr.create(url)
@@ -28,11 +31,12 @@ def ctxt(info, color='red'):
 def dict2url(d):
     return urllib.parse.urlencode(d)
 
+def getSet(name, types=str):
+    log(f"getSet<{name}>: {bili.get_setting(name)}")
+    return bili.get_setting(name, types)
+
 def back():
     xbmc.executebuiltin('Action(Back)')
-
-def get_set(name):
-    return xbmcplugin.getSetting(int(sys.argv[1]), name)
 
 def log(msg):
     xbmc.log(f"[bilikodiReborn] (DBG): {msg}", xbmc.LOGINFO)

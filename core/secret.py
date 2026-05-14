@@ -2,6 +2,7 @@ import json, os
 import requests as r
 
 import core.core as c
+import core.tools as ts
 
 from xbmcswift2 import Plugin
 
@@ -13,13 +14,15 @@ import urllib.parse
 bili = Plugin()
 
 def get_cooks():
+    # if ts.getSet("disable_login", bool): return {}
     return bili.get_storage("user")["cookies"]
 
 def get_refkey():
+    if ts.getSet("disable_login", bool): return ""
     return bili.get_storage("user")["refkey"]
 
 def get_cookie_value(key):
-    cookie = get_cook()
+    cookie = get_cooks()
     if key in cookie:
         return cookie[key]
     return ''

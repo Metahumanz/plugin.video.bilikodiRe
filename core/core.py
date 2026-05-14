@@ -22,6 +22,13 @@ def init():
     if not os.path.exists(temp_dir):
         os.mkdir(temp_dir)
 
+# 项目 icon/fanart/path 模板
+def temp_item(a: dict):
+    a["fanart"] = os.path.join(addon_dir, "fanart.png") 
+    if not "path" in a:
+        a["path"] = bili.url_for("passfunc")
+    return a
+
 def getjson(urlpath, urlbase="https://api.bilibili.com", params="", cookies=srt.get_cooks(), headers=heads):
     #if isinstance(params, dict): parmas = ts.dict2url(parmas)
     res = r.get(f"{urlbase}{urlpath}?{params}", cookies=cookies, headers=headers)
@@ -32,6 +39,26 @@ def getjson(urlpath, urlbase="https://api.bilibili.com", params="", cookies=srt.
         return
     ts.log(res.text)
     return raw
+
+def postjson(urlpath, data, urlbase="https://api.bilibili.com", params="", cookies=srt.get_cooks(), headers=heads):
+    #if isinstance(params, dict): parmas = ts.dict2url(parmas)
+    res = r.post(f"{urlbase}{urlpath}?{params}", cookies=cookies, headers=headers, data=data)
+    ts.log(res.text)
+    try: raw = res.json()
+    except:
+        xbmcgui.Dialog().ok("Error", "Json 解析失败，疑似返回的不是 Json")
+        return
+    ts.log(res.text)
+    return raw
+
+# 记录历史
+def rec_history(bv, cid):
+    if ts.getSet("rec_history", bool) == False: return
+    return postjson("/x/click-interface/web/heartbeat", {
+       "bvid": bv,
+       "cid": cid,
+       "csrf": srt.get_cookie_value("bili_jct")
+    })
 
 ###$$$$$$##########
 # Default Video items back
@@ -101,6 +128,8 @@ def get_viditem(v):
     else:
         duration = 0
     
+    pubtime = ""
+    year = 0
     if 'pubdate' in v:
         pubtime = ts.ts2date(v['pubdate'], ctype=2)
         year = int(ts.ts2date(v['pubdate'], custom="%Y"))
@@ -264,5 +293,25 @@ def login_local():
     else:
         ts.err(f"GetJson Error: {res['code']}: {res['message']}")
         return False
-    
+
+def check_login():
+    cooks = srt.get_cooks()
+    try:
+        re = r.get("https://api.bilibili.com/x/web-interface/nav/stat", headers=heads, cookies=cooks)
+        ts.log(f"Callback: {re.text}")
+        resu = re.json()
+    except:
+        ts.err("RequestsIsNotAvailable")
+        xbmcgui.Dialog().ok("Error", "无法获取登录状态")
+        return
+    # check code
+    if resu["code"] == 0:
+        ts.log("Cookies Available!")
+        return True
+    elif resu["code"] == -101:
+        ts.err("Cookies Unavailable.")
+        return False
+    else:
+        ts.err(f"GetJson Error: {res['code']}: {res['message']}")
+        return False
     

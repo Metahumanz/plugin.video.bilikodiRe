@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+<settings version="1">
+	<section id="plugin.video.bili">
+	    <category id="login" label="30001">
+	        <group id="1" label="30002">
+	            <setting id="login_qrcode" type="string" label="30003" help="30015">
+	                <level>0</level>
+	                <default/>
+	                <constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="button" format="action">
+						<data>Container.Update(plugin://plugin.video.bilikodiRe/login_qrcode/)</data>
+					</control>
+	            </setting>
+	            <setting id="login_cookie" type="string" label="30004">
+	                <level>0</level>
+	                <default/>
+	                <constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="button" format="action">
+						<data>RunPlugin(plugin://plugin.video.bilikodiRe/login_local/)</data>
+					</control>
+	            </setting>
+	            <setting id="login_check" type="string" label="30005">
+	                <level>0</level>
+	                <default/>
+	                <constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="button" format="action">
+						<data>RunPlugin(plugin://plugin.video.bilikodiRe/check_login/)</data>
+					</control>
+	            </setting>
+	            <setting id="disable_login" type="boolean" label="30012">
+	               <level>0</level>
+	               <default>false</default>
+	               <control type="toggle"/>
+	            </setting>
+	        </group>
+	        <group id="2" label="30006">
+	            <setting id="home_fresh" type="number" label="30013" help="30014">
+	               <level>0</level>
+	               <default>4</default>
+					<constraints>
+						<minimum>1</minimum>
+						<step>1</step>
+						<maximum>8</maximum>
+					</constraints>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+	            </setting>
+	            <setting id="rec_history" type="boolean" label="30007">
+	               <level>0</level>
+	               <default>false</default>
+	               <control type="toggle"/>
+	            </setting>
+	            <setting id="rec_home" type="boolean" label="30008">
+	               <level>0</level>
+	               <default>false</default>
+	               <control type="toggle"/>
+	            </setting>
+	        </group>
+	    </category>
+	    <category id="player_option" label="30009">
+	        <group id="1" label="30010">
+	            <setting id="stream_legacy_mode" label="30011">
+	               <level>0</level>
+	               <default>true</default>
+	               <control type="toggle"/>
+	            </setting>
+	        </group>
+	    </category>
+	</section>
+</settings>
