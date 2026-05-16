@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.bilikodiRe" name="bilikodi Reborn" version="1.0.21" provider-name="toadXtech64_Evolution">
+<addon id="plugin.video.bilikodiRe" name="bilikodi Reborn" version="1.0.21" provider-name="toadXtech64-Evolution">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
     <import addon="script.module.requests" version="2.12.4"/>
@@ -12,12 +12,14 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
-    <summary lang="en">bili.kodi</summary>
-    <summary lang="zh_CN">bili.kodi</summary>
-    <description lang="en">[WIP][DEV] Continue of bilikodi project, An New Unofficial third-party bilibili client on kodi</description>
+    <summary lang="en">A "New" Unofficial third-party bilibili client on kodi</summary>
+    <summary lang="zh_CN">一个“新的”非官方的第三方b站客户端 on Kodi</summary>
+    <description lang="en">[WIP][DEV] Continue of bilikodi project,
+i think original code is f#$king sucks so i rebuild it....
+Should support Kodi 19/20/21/22
+    </description>
     <description lang="zh_CN">
 [WIP][DEV] 自 Bilikodi 项目的延续
-一个“新的”非官方的第三方b站客户端 on Kodi
 旧项目代码太神作了于是我推翻重构，，
 按情况来讲应该可以支持 Kodi 19/20/21/22
     </description>
@@ -29,8 +31,9 @@
         <fanart>fanart.png</fanart>
     </assets>
     <disclaimer>
-特别鸣谢 SocialSisterYi/bilibili-API-collect 提供api整理和用法（项目被陈瑞c爆了我哭。）
-特别感谢 chen310/plugin.video.bili 提供了代码给我参考参考（不是抄）
+特别感谢 toad114514/plugin.video.bilikodi 作为此项目的老豆
+特别鸣谢 SocialSisterYi/bilibili-API-collect 提供api整理和用法（项目被陈瑞c爆了。）
+特别感谢 chen310/plugin.video.bili 提供了代码参考/灵感
 本插件与哔哩哔哩官方无任何联系，也没有受到哔哩哔哩官方的授权。
 本插件仅供学习参考使用，本插件不会通过任何手段收集你的信息。
 （我都没钱开服务器我还收集我收你个鸡毛）
