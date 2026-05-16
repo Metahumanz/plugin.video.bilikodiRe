@@ -1,17 +1,15 @@
 # Bilikodi Reborn
 
 <center>
-<img src="https://raw.github.com/Toad114514/plugin.video.bilikodiRe/refs/heads/main/icon.png" width="150" height="150"/>
+<img src="https://raw.github.com/Toad114514/plugin.video.bilikodiRe/refs/heads/master/icon.png" width="150" height="150"/>
 我重生了，发现我找不到kodi的b站客户端于是自己手搓这件事<br>
 Version: idk
 </center>
 
-[//]: # [![Stars](https://img.shields.io/github/stars/Toad114514/plugin.video.bilikodi.svg)](https://github.com/Toad114514/plugin.video.bilikodi/status)
-[//]: # [![Forks](https://img.shields.io/github/forks/Toad114514/plugin.video.bilikodi.svg)](https://github.com/Toad114514/Toad114514/network/members)
-[//]: # [![Issues](https://img.shields.io/github/issues/Toad114514/plugin.video.bilikodi.svg)](https://github.com/Toad114514/plugin.video.bilikodi/issues)
-[//]: # [![Watchers](https://img.shields.io/github/watchers/Toad114514/plugin.video.bilikodi.svg)](https://github.com/Toad114514/plugin.video.bilikodi/watchers)<br>
-[//]: # [![GitHub Tag](https://img.shields.io/github/v/tag/toad114514/plugin.video.bilikodi)](https://github.com/Toad114514/plugin.video.bilikodi/releases)
-[//]: # [![Python](https://img.shields.io/badge/language-Python%203-blue.svg)](https://www.python.org)
+[![Stars](https://img.shields.io/github/stars/Toad114514/plugin.video.bilikodiRe.svg)](https://github.com/Toad114514/plugin.video.bilikodiRe/status)
+[![Forks](https://img.shields.io/github/forks/Toad114514/plugin.video.bilikodiRe.svg)](https://github.com/Toad114514/plugin.video.bilikodiRe/network/members)
+[![Issues](https://img.shields.io/github/issues/Toad114514/plugin.video.bilikodiRe.svg)](https://github.com/Toad114514/plugin.video.bilikodiRe/issues)
+[![Python](https://img.shields.io/badge/language-Python%203-blue.svg)](https://www.python.org)
 # 简介
 神秘的**非第三方**b站客户端的 Kodi 插件  
 Bilikodi 的精神续作（其实是重构版，代码全重写）  
