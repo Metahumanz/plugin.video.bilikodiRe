@@ -32,14 +32,13 @@ def temp_item(a: dict):
 def getjson(urlpath, urlbase="https://api.bilibili.com", params="", cookies=srt.get_cooks(), headers=heads):
     #if isinstance(params, dict): parmas = ts.dict2url(parmas)
     res = r.get(f"{urlbase}{urlpath}?{params}", cookies=cookies, headers=headers)
-    ts.log(res.text)
+    ts.log(f"param: {params}\ncallback: {res.text}")
     try: raw = res.json()
     except:
         xbmcgui.Dialog().ok("Error", "Json 解析失败，疑似返回的不是 Json")
         return
-    ts.log(res.text)
     if raw["code"] != 0:
-        xbmcgui.Dialog().ok(f"请求失败", "{raw['code']}: {raw['message']}")
+        xbmcgui.Dialog().ok("请求失败", f"{raw['code']}: {raw['message']}")
         return 
     return raw
 

@@ -71,13 +71,17 @@ def feed_home(page):
 def user_page(uid):
     pass
 
+# 关注列表
+@bili.route("/user_sub/<uid>")
+
 # 投稿明细
 @bili.route("/user_uploaded/<uid>/<page>")
 def user_upload(uid, page):
-    params = ts.dict2url({
+    params = {
         "mid": uid,
         "pn": page
-    })
+    }
+    params = ts.dict2url(srt.getwbikey(params))
     res = c.getjson("/x/space/wbi/arc/search", params=params)
     if not isinstance(res, dict): return
     
@@ -163,9 +167,9 @@ def fav_con(mlid, page):
 @bili.route("/bvplay/<bv>/<cid>")
 def bvplay(bv, cid):
     legacy_mode = True
-    if cid == 0:
+    if cid == 0 or cid == "0":
         res = c.getjson("/x/web-interface/view", params=ts.dict2url({"bvid": bv}))
-        if res["data"]["code"] == 0:
+        if res["code"] != 0:
             xbmcgui.Dialog().ok("Error", "无法获取视频 cid")
             return
         cid = res["data"]['pages'][0]['cid']
