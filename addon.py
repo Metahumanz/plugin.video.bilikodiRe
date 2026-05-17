@@ -36,6 +36,7 @@ def index():
     c.init()
     i = [
       {"label": "首页推荐", "path": bili.url_for("feed_home", page=1)},
+      {"label": "入站必刷", "path": bili.url_for("feed_popular")},
       {"label": "我的投稿视频", "path": bili.url_for("user_upload", uid=srt.get_uid(), page=1)},
       {"label": "我的关注", "path": bili.url_for("user_sub", uid=srt.get_uid(), page=1)},
       {"label": "我的收藏夹", "path": bili.url_for("user_fav", uid=srt.get_uid())},
@@ -64,6 +65,17 @@ def feed_home(page):
             continue
         items.append(c.get_viditem(x))
     items.append({"label": ts.ctxt(f"下一页 (目前在第 {page} 页)", color="yellow"), "path": bili.url_for("feed_home", page=int(page)+1)})
+    return items
+
+# 入站必刷
+@bili.route("/feed_popular/")
+def feed_popular():
+    res = c.getjson("/x/web-interface/popular/precious")
+    if not isinstance(res, dict): return
+    
+    items = []
+    for x in res["data"]["list"]:
+        items.append(c.get_viditem(x))
     return items
 
 ########################
