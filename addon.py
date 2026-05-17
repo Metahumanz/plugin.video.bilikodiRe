@@ -36,6 +36,7 @@ def index():
     c.init()
     i = [
       {"label": "首页推荐", "path": bili.url_for("feed_home", page=1)},
+      {"label": "我的投稿视频", "path": bili.url_for("user_upload", uid=srt.get_uid(), page=1)},
       {"label": "我的收藏夹", "path": bili.url_for("user_fav", uid=srt.get_uid())},
       # {"label": "我的账号", "path": bili.url_for("user")},
       {"label": "插件设置", "path": bili.url_for("open_set")},
@@ -55,6 +56,8 @@ def feed_home(page):
     params = {"fresh_type": ts.getSet("home_fresh"), "fresh_idx": int(page), "ps": 20}
     params = ts.dict2url(params)
     res = c.getjson("/x/web-interface/wbi/index/top/feed/rcmd?", params=params)
+    if not isinstance(res, dict): return
+    
     for x in res["data"]["item"]:
         if not x["bvid"]:
             continue
@@ -68,6 +71,20 @@ def feed_home(page):
 def user_page(uid):
     pass
 
+# 投稿明细
+@bili.route("/user_uploaded/<uid>/<page>")
+def user_upload(uid, page):
+    params = ts.dict2url({
+        "mid": uid,
+        "pn": page
+    })
+    res = c.getjson("/x/space/wbi/arc/search", params=params)
+    if not isinstance(res, dict): return
+    
+    items = []
+    for x in res["data"]["list"]["vlist"]:
+        items.append(c.get_viditem(x))
+    return items
 
 # 收藏
 @bili.route("/fav_folder/<uid>")
