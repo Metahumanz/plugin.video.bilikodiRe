@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <settings version="1">
-	<section id="plugin.video.bili">
+	<section id="plugin.video.bilikodiRe">
 	    <category id="login" label="30001">
-	        <group id="1" label="30002">
+	        <group id="login_groups" label="30002">
 	            <setting id="login_qrcode" type="string" label="30003" help="30015">
 	                <level>0</level>
 	                <default/>
@@ -39,8 +39,8 @@
 	               <control type="toggle"/>
 	            </setting>
 	        </group>
-	        <group id="2" label="30006">
-	            <setting id="home_fresh" type="number" label="30013" help="30014">
+	        <group id="privacy_groups" label="30006">
+	            <setting id="home_fresh" type="integer" label="30013" help="30014">
 	               <level>0</level>
 	               <default>4</default>
 					<constraints>
@@ -64,8 +64,9 @@
 	            </setting>
 	        </group>
 	    </category>
-	    <category id="player_option" label="30009">
-	        <group id="1" label="30010">
+	    
+	    <category id="player_cate" label="30009">
+	        <group id="stream_groups" label="30010">
 	            <setting id="stream_legacy_mode" label="30011">
 	               <level>0</level>
 	               <default>true</default>
