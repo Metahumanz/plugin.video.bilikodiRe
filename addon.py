@@ -20,7 +20,7 @@ except AttributeError:
 bili = c.bili
 
 # version
-version = "v1.0.21"
+version = "v1.0.25"
 debug = True
 
 # passfunc

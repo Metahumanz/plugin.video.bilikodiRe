@@ -22,6 +22,10 @@ Should support Kodi 19/20/21/22
 [WIP][DEV] 自 Bilikodi 项目的延续
 旧项目代码太神作了于是我推翻重构，，
 按情况来讲应该可以支持 Kodi 19/20/21/22
+
+特别感谢 toad114514/plugin.video.bilikodi 作为此项目的老豆
+特别鸣谢 SocialSisterYi/bilibili-API-collect 提供api整理和用法（项目被陈瑞c爆了。）
+特别感谢 chen310/plugin.video.bili 提供了代码参考/灵感
     </description>
   <website>https://www.bilibili.com</website>
   <source>https://github.com/toad114514/plugin.video.bilikodiRe</source>
@@ -31,14 +35,19 @@ Should support Kodi 19/20/21/22
         <fanart>fanart.png</fanart>
     </assets>
     <disclaimer>
-特别感谢 toad114514/plugin.video.bilikodi 作为此项目的老豆
-特别鸣谢 SocialSisterYi/bilibili-API-collect 提供api整理和用法（项目被陈瑞c爆了。）
-特别感谢 chen310/plugin.video.bili 提供了代码参考/灵感
+本插件使用了 MIT License 开源协议，用户造成的问题导致 B站号被封/IP封禁/小黑屋/78被砍/法律问题/九蓝一金/在上层饿死/变成爱牛/地球爆炸 等问题都与原作者无关。
 本插件与哔哩哔哩官方无任何联系，也没有受到哔哩哔哩官方的授权。
 本插件仅供学习参考使用，本插件不会通过任何手段收集你的信息。
-（我都没钱开服务器我还收集我收你个鸡毛）
     </disclaimer>
   <news>
+- v1.0.25
+ 入站必刷 完成（最快完成的一次）
+- v1.0.24
+ 各种修复
+- v1.0.23
+ 用户关注 50/100%（只有个壳）
+- v1.0.22
+ 用户投稿 完成
 - v1.0.21
  用户收藏夹 Done
 - v1.0.20
