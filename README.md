@@ -2,7 +2,9 @@
 
 <center>
 <img src="https://raw.github.com/Toad114514/plugin.video.bilikodiRe/refs/heads/master/icon.png" width="150" height="150"/>
-我重生了，发现我找不到kodi的b站客户端于是自己手搓这件事<br>
+我重生了，发现我找不到  
+   kodi的b站客户端了  
+于是自己手搓这件事<br>
 Version: idk
 </center>
 
@@ -30,6 +32,6 @@ Bilikodi 的精神续作（其实是重构版，代码全重写）
    - 收藏夹/内容查看
 # 鸣谢和声明
 [toad114514/plugin.video.bilikodi](https://github.com/toad114514/plugin.video.bilikodi) - 此项目的老豆，子承父业这一块  
-[SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) - 收集了大量的b站api用于本插件的运作（bro已经没了😭）  
+[SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) - 收集了大量的b站api用于本插件的运作（仓库已被叔叔爆破😭）  
 [chen310/plugin.video.bili](https://github.com/chen310/plugin.video.bili) - 代码参考  
 本插件与哔哩哔哩官方没有任何关系，也没有受到哔哩哔哩官方的允许。  
