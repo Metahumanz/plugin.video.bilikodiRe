@@ -73,6 +73,8 @@ def user_page(uid):
 
 # 关注列表
 @bili.route("/user_sub/<uid>")
+def user_sub(uid):
+    pass
 
 # 投稿明细
 @bili.route("/user_uploaded/<uid>/<page>")
@@ -88,6 +90,14 @@ def user_upload(uid, page):
     items = []
     for x in res["data"]["list"]["vlist"]:
         items.append(c.get_viditem(x))
+    
+    page = int(page)
+    maxpage = res["data"]["page"]["count"] // res["data"]["page"]["ps"]
+    if maxpage > page:
+        items.append(c.temp_item({
+            "label": ts.ctxt(f"下一页 ({page}/{maxpage})", color="yellow"),
+            "path": bili.url_for("user_upload", uid=uid, page=page+1)
+        }))
     return items
 
 # 收藏
