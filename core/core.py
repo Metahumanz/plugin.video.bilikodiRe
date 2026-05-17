@@ -38,6 +38,9 @@ def getjson(urlpath, urlbase="https://api.bilibili.com", params="", cookies=srt.
         xbmcgui.Dialog().ok("Error", "Json 解析失败，疑似返回的不是 Json")
         return
     ts.log(res.text)
+    if raw["code"] != 0:
+        xbmcgui.Dialog().ok(f"请求失败", "{raw['code']}: {raw['message']}")
+        return 
     return raw
 
 def postjson(urlpath, data, urlbase="https://api.bilibili.com", params="", cookies=srt.get_cooks(), headers=heads):
