@@ -37,6 +37,7 @@ def index():
     i = [
       {"label": "首页推荐", "path": bili.url_for("feed_home", page=1)},
       {"label": "我的投稿视频", "path": bili.url_for("user_upload", uid=srt.get_uid(), page=1)},
+      {"label": "我的关注", "path": bili.url_for("user_sub", uid=srt.get_uid(), page=1)},
       {"label": "我的收藏夹", "path": bili.url_for("user_fav", uid=srt.get_uid())},
       # {"label": "我的账号", "path": bili.url_for("user")},
       {"label": "插件设置", "path": bili.url_for("open_set")},
@@ -67,14 +68,56 @@ def feed_home(page):
 
 ########################
 #  User/用户/Up主 路由
-@bili.route("/user/<uid>")
+@bili.route("/user/<uid>/")
 def user_page(uid):
     pass
 
 # 关注列表
-@bili.route("/user_sub/<uid>")
-def user_sub(uid):
-    pass
+@bili.route("/user_sub/<uid>/<page>/")
+def user_sub(uid, page):
+    ps = 50
+    params = ts.dict2url({
+        "vmid": uid,
+        "pn": int(page),
+        "ps": ps
+    })
+    res = c.getjson("/x/relation/followings", params=params)
+    if not isinstance(res, dict): return
+    
+    items = []
+    for x in res["data"]["list"]:
+        plot = ""
+        is_subto = False
+        plot += x["sign"] + "\n\n"
+        if x["attribute"] == 6:
+            is_subto = True
+            plot += ts.ctxt("我想你两可能是 Friend", color="pink")
+        if x["official_verify"]["type"] != -1:
+            plot += "\n" + ts.ctxt(x["official_verify"]["desc"], color="yellow")
+        
+        if is_subto:
+            label = ts.ctxt(x["uname"], color="pink")
+        else:
+            label = x["uname"]
+        
+        items.append({
+            "label": label,
+            "path": bili.url_for("passfunc"),
+            "icon": x["face"],
+            "info": { "plot": plot }
+        })
+        
+    maxpage = res["data"]["total"] // ps
+    page = int(page)
+    if res["data"]["total"] % ps != 0:
+        maxpage += 1
+    if maxpage > page:
+        items.append(c.temp_item({
+          "label": ts.ctxt(f"下一页 ({page}/{maxpage})", color="yellow"),
+          "path": bili.url_for("user_sub", uid=uid, page=page+1)
+        }))
+    
+    return items
 
 # 投稿明细
 @bili.route("/user_uploaded/<uid>/<page>")
@@ -93,6 +136,8 @@ def user_upload(uid, page):
     
     page = int(page)
     maxpage = res["data"]["page"]["count"] // res["data"]["page"]["ps"]
+    if res["data"]["page"]["count"] % res["data"]["page"]["ps"] != 0:
+        maxpage += 1
     if maxpage > page:
         items.append(c.temp_item({
             "label": ts.ctxt(f"下一页 ({page}/{maxpage})", color="yellow"),
