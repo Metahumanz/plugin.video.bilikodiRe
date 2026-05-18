@@ -41,7 +41,7 @@ msgstr "匿名获取主页推荐"
 
 msgctxt "#30009"
 msgid "Player"
-msgstr "播放器"
+msgstr "播放"
 
 msgctxt "#30010"
 msgid "Video stream"
@@ -67,37 +67,37 @@ msgctxt "#30014"
 msgid "The higher the value, the more relevant the recommended content will be"
 msgstr "值越高推荐内容也就越相关"
 
+msgctxt "#30016"
+msgid "Interface/UI"
+msgstr "界面/Ui"
+
+msgctxt "#30017"
+msgid "Page Num. Settings"
+msgstr "单页数量设定"
+
+msgctxt "#30018"
+msgid "Home Page Num."
+msgstr "首页推荐单页数量"
+
 msgctxt "#30019"
-msgid "Danmaku Stay Time"
-msgstr "弹幕停留时间"
+msgid "Subtribe/Fans Page Num."
+msgstr "关注/粉丝列表单页数量"
 
 msgctxt "#30020"
-msgid "Video Resolution"
-msgstr "视频分辨率"
+msgid "User Uploaded Video Page Num."
+msgstr "Up主投稿视频单页数量"
 
 msgctxt "#30021"
-msgid "Video Resolution"
-msgstr "视频分辨率"
+msgid "Details"
+msgstr "详细"
 
 msgctxt "#30022"
-msgid "8K Ultra HD"
-msgstr "8K 超高清"
+msgid "More Details in Bookmarks"
+msgstr "在收藏夹列表中获得详细内容"
 
 msgctxt "#30023"
-msgid "Dolby Vision"
-msgstr "杜比视界"
-
-msgctxt "#30024"
-msgid "HDR True Color"
-msgstr "HDR 真彩色"
-
-msgctxt "#30025"
-msgid "4K Ultra HD"
-msgstr "4K 超清"
-
-msgctxt "#30026"
-msgid "1080P60 High Frame Rate"
-msgstr "1080P60 高帧率"
+msgid "If you have more bookmarks, you will need to wait longer"
+msgstr "如果你有较多收藏夹，那么将需要更长时间等待"
 
 msgctxt "#30027"
 msgid "1080P+ High Bitrate"
