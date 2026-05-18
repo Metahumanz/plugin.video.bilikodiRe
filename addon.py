@@ -228,6 +228,9 @@ def user_fav(uid):
     params = ts.dict2url({"up_mid": int(uid)})
     res = c.getjson("/x/v3/fav/folder/created/list-all", params=params)
     if not isinstance(res, dict): return
+    if res["data"] == None:
+        xbmcgui.Dialog().ok("ee", "此用户不公开/没有收藏夹")
+        return
     
     items = []
     for x in res["data"]["list"]:
