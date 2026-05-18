@@ -37,6 +37,7 @@ def index():
     i = [
       {"label": "首页推荐", "path": bili.url_for("feed_home", page=1)},
       {"label": "入站必刷", "path": bili.url_for("feed_popular")},
+      {"label": "我的页面", "path": bili.url_for("user_page", uid=srt.get_uid())},
       {"label": "我的投稿视频", "path": bili.url_for("user_upload", uid=srt.get_uid(), page=1)},
       {"label": "我的关注", "path": bili.url_for("user_sub", uid=srt.get_uid(), page=1)},
       {"label": "我的收藏夹", "path": bili.url_for("user_fav", uid=srt.get_uid())},
@@ -55,7 +56,7 @@ def index():
 @bili.route("/feed_home/<page>")
 def feed_home(page):
     items = []
-    params = {"fresh_type": ts.getSet("home_fresh"), "fresh_idx": int(page), "ps": 20}
+    params = {"fresh_type": ts.getSet("home_fresh"), "fresh_idx": int(page), "ps": ts.getSet("ps.home", int)}
     params = ts.dict2url(params)
     res = c.getjson("/x/web-interface/wbi/index/top/feed/rcmd?", params=params)
     if not isinstance(res, dict): return
@@ -82,12 +83,75 @@ def feed_popular():
 #  User/用户/Up主 路由
 @bili.route("/user/<uid>/")
 def user_page(uid):
-    pass
+    params = srt.getwbikey({
+        "mid": uid
+    })
+    params = ts.dict2url(params)
+    
+    # 添加两项空值以过鉴权
+    cooks = srt.get_cooks()
+    cooks["a"] = ""
+    cooks["bing"] = ""
+    res = c.getjson("/x/space/wbi/acc/info", params=params, cookies=cooks)
+    if not isinstance(res, dict): return
+    
+    # Metadata
+    i = res["data"]
+    label = ts.ctxt("[Metadata] ", color="yellow")
+    plot = ""
+    
+    # Card requests 获取粉丝等数据
+    card = c.getjson("/x/web-interface/card", params=ts.dict2url({"mid": uid, "photo": False}))
+    
+    plot += f"UID: {i['mid']}\n"
+    if i["sex"] != "保密":
+        plot += f"{i['sex']}性 | "
+    plot += f"Lv{i['level']}"
+    if i["is_senior_member"] == 1:
+        plot += " (硬核)"
+    plot += " | "
+    if isinstance(card, dict):
+        cd = card["data"]
+        card = card["data"]["card"]
+        plot += f"{cd['archive_count']} 稿件 | "
+        plot += f"{card['fans']} 粉丝 | "
+        plot += f"{card['attention']} 关注 | "
+        plot += f"{cd['like_num']} 点赞"
+    plot += "\n"
+    
+    # 主播被封了。
+    if i["silence"] == 1:
+        plot += ts.ctxt("主播老实了被封了。", color="red") + "\n"
+    if i["is_followed"] == True:
+        label += ts.ctxt("[已关注] ", color="red")
+    if i["official"]["role"] != 0:
+        plot += f"{i['official']['title']}\n"
+    plot += f"\n{i['sign']}"
+    
+    label += f"{i['name']}"
+    items = []
+    # Metadata
+    items.append({
+       "label": label,
+       "icon": i["face"],
+       "fanart": i["face"],
+       "path": bili.url_for("passfunc"),
+       "info": {
+           "plot": plot
+       }
+    })
+    # OtherPath
+    items.append({"label": "用户投稿", "path": bili.url_for("user_upload", uid=i["mid"], page=1)})
+    items.append({"label": "用户收藏夹", "path": bili.url_for("user_fav", uid=i["mid"])})
+    items.append({"label": "用户关注列表", "path": bili.url_for("user_sub", uid=i["mid"], page=1)})
+    
+    return items
+    
 
 # 关注列表
 @bili.route("/user_sub/<uid>/<page>/")
 def user_sub(uid, page):
-    ps = 50
+    ps = ts.getSet("ps.subs", int)
     params = ts.dict2url({
         "vmid": uid,
         "pn": int(page),
@@ -114,7 +178,7 @@ def user_sub(uid, page):
         
         items.append({
             "label": label,
-            "path": bili.url_for("passfunc"),
+            "path": bili.url_for("user_page", uid=x["mid"]),
             "icon": x["face"],
             "info": { "plot": plot }
         })
@@ -136,7 +200,8 @@ def user_sub(uid, page):
 def user_upload(uid, page):
     params = {
         "mid": uid,
-        "pn": page
+        "pn": page,
+        "ps": ts.getSet("ps.upvideos", int)
     }
     params = ts.dict2url(srt.getwbikey(params))
     res = c.getjson("/x/space/wbi/arc/search", params=params)
@@ -162,18 +227,26 @@ def user_upload(uid, page):
 def user_fav(uid):
     params = ts.dict2url({"up_mid": int(uid)})
     res = c.getjson("/x/v3/fav/folder/created/list-all", params=params)
-    if not res: return
-    if res["code"] != 0:
-        xbmcgui.Dialog().ok("Error", f"{res['code']}: {res['message']}")
-        return
+    if not isinstance(res, dict): return
     
     items = []
     for x in res["data"]["list"]:
+        # No Details
+        if ts.getSet("detail.fav", bool) != True:
+            items.append({
+               "label": x["title"],
+               "path": bili.url_for("fav_con", mlid=x["id"], page=1),
+               "info": {
+                 "plot": f"已收藏 {x['media_count']} 个视频"
+               }
+            })
+            continue
+        
+        # Details More
         idx = x["id"]
         params=ts.dict2url({"media_id": int(idx)})
         info = c.getjson("/x/v3/fav/folder/info", params=params)
-        if not res: continue
-        if res["code"] != 0: continue
+        if not isinstance(info, dict): return
         
         plot = ""
         i = info["data"]
@@ -196,7 +269,7 @@ def user_fav(uid):
     return items
 
 # 收藏夹内容
-@bili.route("/fav_content/<mlid>/<page>")
+@bili.route("/fav_content/<mlid>/<page>/")
 def fav_con(mlid, page):
     page = int(page)
     params = ts.dict2url({
@@ -206,10 +279,7 @@ def fav_con(mlid, page):
         "pn": page
     })
     res = c.getjson("/x/v3/fav/resource/list", params=params)
-    if not res: return
-    if res["code"] != 0:
-        xbmcgui.Dialog().ok("Error", f"{res['code']}: {res['message']}")
-        return
+    if not isinstance(res, dict): return
     
     items = []
     res = res["data"]

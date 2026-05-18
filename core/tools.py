@@ -3,6 +3,7 @@ import xbmc, xbmcplugin, os, sys
 import pyqrcode as qr
 import urllib.parse
 
+# from xbmcaddon import Addon
 from xbmcswift2 import Plugin
 bili = Plugin()
 
@@ -34,6 +35,15 @@ def dict2url(d):
 def getSet(name, types=str):
     log(f"getSet<{name}>: {bili.get_setting(name)}")
     return bili.get_setting(name, types)
+    # match types:
+        # case "float" | "flt" | "flo" | "fat":
+            # return float(bili.getSetting(name))
+        # case "bool" | "boolean":
+            # return bool(bili.getSetting(name))
+        # case "num" | "int" | "integer":
+            # return int(bili.getSetting(name))
+        # case _:
+            # return bili.getSetting(name)
 
 def back():
     xbmc.executebuiltin('Action(Back)')

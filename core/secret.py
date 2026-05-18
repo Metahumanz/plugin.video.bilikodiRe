@@ -18,7 +18,7 @@ def get_cooks():
     return bili.get_storage("user")["cookies"]
 
 def get_refkey():
-    if ts.getSet("disable_login", bool): return ""
+    # if ts.getSet("disable_login", "bool"): return ""
     return bili.get_storage("user")["refkey"]
 
 def get_cookie_value(key):

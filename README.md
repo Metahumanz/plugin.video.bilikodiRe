@@ -26,13 +26,18 @@ Bilikodi 的精神续作（其实是重构版，代码全重写）
  - 首页推荐
    - 支持调整内容相关性
  - 入站必刷
- - 视频/稿件播放
-   - Dash (1080+) \[beta测试\]
-   - Legacy mp4 (旧版 Bilikodi 方案, 最高 720p)
+ - 视频/稿件相关
+   - Dash (1080+) \[beta测试 暂时不开放\]
+   - Legacy mp4 (旧版 Bilikodi 方案, 默认 720p)
+   - 允许跳转到 Up 主
  - Up主/用户
+   - 用户详细元数据
    - 视频投稿内容
    - 收藏夹/内容查看
    - 关注列表
+ - 界面调整
+   - 支持调整各种页面的单页显示数 (首页/关注列表/稿件)
+   - 支持调整直接显示详细内容 (收藏夹)
 # 鸣谢和声明
 [toad114514/plugin.video.bilikodi](https://github.com/toad114514/plugin.video.bilikodi) - 此项目的老豆，子承父业这一块  
 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) - 收集了大量的b站api用于本插件的运作（仓库已被叔叔爆破😭）  

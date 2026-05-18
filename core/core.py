@@ -152,7 +152,7 @@ def get_viditem(v):
     context = [
        ("点赞", f"Container.Update({bili.url_for('passfunc')}")
     ]
-    if uname: context.append((f"跳转到 {uname}", f"Container.Update({bili.url_for('passfunc')})"))
+    if uname: context.append((f"跳转到 {uname}", f"Container.Update({bili.url_for('user_page', uid=mid)})"))
     i = {
        "label": title,
        "icon": pic,
