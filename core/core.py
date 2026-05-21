@@ -40,6 +40,9 @@ def getjson(urlpath, urlbase="https://api.bilibili.com", params="", cookies=srt.
     if raw["code"] != 0:
         xbmcgui.Dialog().ok("请求失败", f"{raw['code']}: {raw['message']}")
         return 
+    if "v_voucher" in raw["data"]:
+        xbmcgui.Dialog().ok("请求失败", f"接口返回了 v_voucher Captcha 验证\n然后就是很抱歉的告诉你这个功能用不了因为接口要求必须先进行人机验证但 Kodi 目前提供的 API 根本不能让人机验证显示在 Kodi 中让用户验证\n我还在想办法解决这个问题...")
+        return
     return raw
 
 def postjson(urlpath, data, urlbase="https://api.bilibili.com", params="", cookies=srt.get_cooks(), headers=heads):
