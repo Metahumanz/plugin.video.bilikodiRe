@@ -35,12 +35,16 @@ Bilikodi 的精神续作（其实是重构版，代码全重写）
    - 视频投稿内容
    - 收藏夹/内容查看
    - 关注列表
+ - 搜索功能（半残）
  - 界面调整
    - 支持调整各种页面的单页显示数 (首页/关注列表/稿件)
    - 支持调整直接显示详细内容 (收藏夹)
+# 已知问题
+ - 默认收藏夹无法打开的bug
+ - 搜索功能部分地区必须要求人机验证（我这里就是所以没办法测试搜索功能）
 # 鸣谢和声明
 [toad114514/plugin.video.bilikodi](https://github.com/toad114514/plugin.video.bilikodi) - 此项目的老豆，子承父业这一块  
-[SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) - 收集了大量的b站api用于本插件的运作（仓库已被叔叔爆破😭）  
+[SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) - 收集了大量的b站api用于本插件的运作（仓库已被叔叔爆破）  
 [chen310/plugin.video.bili](https://github.com/chen310/plugin.video.bili) - 代码参考  
 本插件使用了 MIT License 开源协议，用户造成的问题导致 B站号被封/IP封禁/小黑屋/78被砍/法律问题/九蓝一金/在上层饿死/变成爱牛/地球爆炸 等问题都与原作者无关。  
 本插件与哔哩哔哩官方没有任何关系，本项目也没有受到哔哩哔哩官方的允许和支持。  

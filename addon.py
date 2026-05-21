@@ -37,11 +37,11 @@ def index():
     i = [
       {"label": "首页推荐", "path": bili.url_for("feed_home", page=1)},
       {"label": "入站必刷", "path": bili.url_for("feed_popular")},
-      {"label": "我的页面", "path": bili.url_for("user_page", uid=srt.get_uid())},
+      {"label": "我的账户", "path": bili.url_for("user_page", uid=srt.get_uid())},
       {"label": "我的投稿视频", "path": bili.url_for("user_upload", uid=srt.get_uid(), page=1)},
       {"label": "我的关注", "path": bili.url_for("user_sub", uid=srt.get_uid(), page=1)},
       {"label": "我的收藏夹", "path": bili.url_for("user_fav", uid=srt.get_uid())},
-      # {"label": "我的账号", "path": bili.url_for("user")},
+      {"label": "搜索", "path": bili.url_for("search_ready")},
       {"label": "插件设置", "path": bili.url_for("open_set")},
       # {"label": "登录帐号", "path": bili.url_for("login_qrcode")},
       {"label": "Bilikodi Reborn 帮助", "path": bili.url_for('help')},
@@ -299,6 +299,87 @@ def fav_con(mlid, page):
             "path": bili.url_for("fav_con", mlid=int(mlid), page=page+1)
         }))
     
+    return items
+
+########################
+# 搜索 Search
+
+def search_global(d):
+    items = []
+    
+    if d["page"] == 1:
+        items.append({"label": ts.ctxt("搜用户", color="pink"), "path": bili.url_for("passfunc")})
+        items.append({"label": ts.ctxt("搜番剧", color="pink"), "path": bili.url_for("passfunc")})
+    
+    b = d["result"][3] # 番剧/影视
+    u = d["result"][5] # 用户/Up主
+    v = d["result"][8] # 一堆视频
+    
+    if len(b["data"]) != 0:
+        nb = b["data"][0]
+        label = ""
+        
+        plot = nb["desc"]
+        if nb["type"] == "media_bangumi":
+            label = ts.ctxt("[番剧] ", color="pink")
+        else:
+            label = ts.ctxt("[影视] ", color="yellow")
+        label += nb["title"]
+        items.append({"label": label, "icon": nb["cover"], "path": bili.url_for("passfunc"), "info": {"plot": plot}})
+    
+    if len(u["data"]) != 0:
+        nu = u["data"][0]
+        
+        plot = ""
+        plot += f"uid: {nu['mid']}\n"
+        plot += f"{nu['fans']} 粉丝 | {nu['videos']} 投稿 | Lv{nu['level']}\n"
+        plot += f"\n{nu['usign']}"
+        
+        label = ts.ctxt("[用户] ", color="yellow") + nu["uname"]
+        items.append({"label": label, "icon": nu["upic"], "path": bili.url_for("user_page", uid=nu["mid"]), "info": {"plot": plot}})
+    
+    # Videos
+    for x in v["data"]:
+        items.append(c.get_viditem())
+    return items
+    
+
+@bili.route("/search/<keyword>/<typ>/<page>")
+def search(keyword, typ, page):
+    items = []
+    # autoinput
+    if typ == "all_input":
+        typ = "all"
+        keyboard = xbmc.Keyboard('', '请输入搜索内容')
+        keyboard.doModal()
+        if (keyboard.isConfirmed()):
+            keyword = keyboard.getText()
+        else:
+            return videos
+    
+    # urlpath/params
+    urlpath = "/x/web-interface/wbi/search/all/v2"
+    params = {
+        "keyword": keyword
+    }
+    if typ != "all":
+        params["search_type"] = typ
+        urlpath = "/x/web-interface/wbi/search/type"
+    
+    # Get
+    res = c.getjson(urlpath, params=params)
+    if not isinstance(res, dict): return
+    
+    # 综合搜索
+    if typ == "all":
+        return search_global(res["data"])
+    
+
+@bili.route("/search_ready/")
+def search_ready():
+    items = [
+      {"label": ts.ctxt("新搜索", color="yellow"), "path": bili.url_for("search", keyword="abx", typ="all_input", page=1)}
+    ]
     return items
 
 
