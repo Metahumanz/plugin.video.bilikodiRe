@@ -20,7 +20,7 @@ except AttributeError:
 bili = c.bili
 
 # version
-version = "v1.0.25"
+version = "v1.0.31"
 debug = True
 
 # passfunc
@@ -155,7 +155,7 @@ def user_sub(uid, page):
     params = ts.dict2url({
         "vmid": uid,
         "pn": int(page),
-        "ps": ps
+        "ps": ts.getSet("ps.subs", int)
     })
     res = c.getjson("/x/relation/followings", params=params)
     if not isinstance(res, dict): return

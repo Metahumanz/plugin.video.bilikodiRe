@@ -27,8 +27,25 @@ def get_cookie_value(key):
         return cookie[key]
     return ''
 
+def set_cookie_value(key, v):
+    cookie = bili.get_storage("user")
+    cookie["cookies"][key] = v
+    cookie.sync()
+
 def get_uid():
     return get_cookie_value('DedeUserID') or '0'
+
+def update_buvid():
+    if ts.getSet("priv_buvid", bool) == False: return
+    res = r.get("https://api.bilibili.com/x/web-frontend/getbuvid")
+    ts.log(res.text)
+    try:
+        raw = res.json()
+    except Exception:
+        return
+    if "data" in raw:
+        set_cookie_value("buvid3", raw["data"]["buvid"])
+        # set_cookie_value("buvid4", raw["data"]["b_4"])
 
 ###########
 # Wbi Sign

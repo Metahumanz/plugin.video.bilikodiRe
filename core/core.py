@@ -21,6 +21,7 @@ bili = Plugin()
 def init():
     if not os.path.exists(temp_dir):
         os.mkdir(temp_dir)
+    srt.update_buvid()
 
 # 项目 icon/fanart/path 模板
 def temp_item(a: dict):

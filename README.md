@@ -20,7 +20,7 @@ Bilikodi 的精神续作（其实是重构版，代码全重写）
 # 特性
  - 登录/隐私
    - 二维码登录
-   - 快捷导入/导出 Cookie [如何快速通过导入 Cookie 登录](login_local.md)
+   - 快捷导入/导出 Cookie [如何通过导入 Cookie 登录](login_local.md)
    - 允许不记录历史
    - 允许临时关闭账号使用游客登录
  - 首页推荐
