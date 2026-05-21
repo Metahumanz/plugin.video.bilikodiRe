@@ -99,29 +99,29 @@ msgctxt "#30023"
 msgid "If you have more bookmarks, you will need to wait longer"
 msgstr "如果你有较多收藏夹，那么将需要更长时间等待"
 
+msgctxt "#30024"
+msgid "Try Update buvid3 every plugin startup"
+msgstr "每次启动插件时尝试更新 buvid3"
+
+msgctxt "#30025"
+msgid "Others"
+msgstr "杂项"
+
+msgctxt "#30026"
+msgid "User details background cover set as..."
+msgstr "将用户详情背景图设为..."
+
 msgctxt "#30027"
-msgid "1080P+ High Bitrate"
-msgstr "1080P+ 高码率"
+msgid "User Avatar"
+msgstr "用户头像"
 
 msgctxt "#30028"
-msgid "1080P HD"
-msgstr "1080P 高清"
+msgid "User head image"
+msgstr "用户主页头图"
 
 msgctxt "#30029"
-msgid "720P60 High Frame Rate"
-msgstr "720P60 高帧率"
-
-msgctxt "#30030"
-msgid "720P HD"
-msgstr "720P 高清"
-
-msgctxt "#30031"
-msgid "480P"
-msgstr "480P 清晰"
-
-msgctxt "#30032"
-msgid "360P"
-msgstr "360P 流畅"
+msgid "Default"
+msgstr "默认设定"
 
 msgctxt "#30033"
 msgid "240P"

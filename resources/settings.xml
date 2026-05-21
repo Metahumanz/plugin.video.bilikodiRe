@@ -38,6 +38,11 @@
 	               <default>false</default>
 	               <control type="toggle"/>
 	            </setting>
+	            <setting id="priv_buvid" type="boolean" label="30024">
+	               <level>0</level>
+	               <default>false</default>
+	               <control type="toggle"/>
+	            </setting>
 	        </group>
 	        
 	        <group id="2" label="30006">
@@ -110,6 +115,22 @@
 	                <level>0</level>
 	                <default>false</default>
 	                <control type="toggle"/>
+	            </setting>
+	        </group>
+	        <group id="3" label="30025">
+	            <setting id="other.userfanart" type="integer" label="30026">
+	                <level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30027">2</option>
+							<option label="30028">1</option>
+							<option label="30029">0</option>
+						</options>
+					</constraints>
+					<control type="list" format="string">
+						<heading>30026</heading>
+					</control>
 	            </setting>
 	        </group>
 	    </category>

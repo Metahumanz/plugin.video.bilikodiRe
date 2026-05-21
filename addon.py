@@ -99,9 +99,11 @@ def user_page(uid):
     i = res["data"]
     label = ts.ctxt("[Metadata] ", color="yellow")
     plot = ""
+    ufi = ts.getSet("other.userfanart", int) # 0 = default 1 = userHeadimage 2 = userAvatar
+    ufiurl = c.get_image("bg")
     
     # Card requests 获取粉丝等数据
-    card = c.getjson("/x/web-interface/card", params=ts.dict2url({"mid": uid, "photo": False}))
+    card = c.getjson("/x/web-interface/card", params=ts.dict2url({"mid": uid, "photo": True}))
     
     plot += f"UID: {i['mid']}\n"
     if i["sex"] != "保密":
@@ -117,7 +119,12 @@ def user_page(uid):
         plot += f"{card['fans']} 粉丝 | "
         plot += f"{card['attention']} 关注 | "
         plot += f"{cd['like_num']} 点赞"
+        if ufi == 1:
+            ufiurl = cd["space"]["l_img"]
     plot += "\n"
+    
+    if ufi == 2:
+        ufiurl = i["face"]
     
     # 主播被封了。
     if i["silence"] == 1:
@@ -134,16 +141,16 @@ def user_page(uid):
     items.append({
        "label": label,
        "icon": i["face"],
-       "fanart": i["face"],
+       "fanart": ufiurl,
        "path": bili.url_for("passfunc"),
        "info": {
            "plot": plot
        }
     })
     # OtherPath
-    items.append({"label": "用户投稿", "path": bili.url_for("user_upload", uid=i["mid"], page=1)})
-    items.append({"label": "用户收藏夹", "path": bili.url_for("user_fav", uid=i["mid"])})
-    items.append({"label": "用户关注列表", "path": bili.url_for("user_sub", uid=i["mid"], page=1)})
+    items.append({"label": "用户投稿", "fanart": ufiurl, "path": bili.url_for("user_upload", uid=i["mid"], page=1)})
+    items.append({"label": "用户收藏夹", "fanart": ufiurl, "path": bili.url_for("user_fav", uid=i["mid"])})
+    items.append({"label": "用户关注列表", "fanart": ufiurl, "path": bili.url_for("user_sub", uid=i["mid"], page=1)})
     
     return items
     

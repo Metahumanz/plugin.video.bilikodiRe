@@ -30,6 +30,18 @@ def temp_item(a: dict):
         a["path"] = bili.url_for("passfunc")
     return a
 
+# 项目图库
+def get_image(s):
+    match s:
+        case "bilikodi" | "logo" | "bilikodire" | "icon":
+            return os.path.join(addon_dir, "icon.png")
+        case "oldfanart" | "oldbg" | "old_bg" | "bsgm":
+            return os.path.join(addon_dir, "old_fanart.png")
+        case "fanart" | "bg" | "srow3" | "sr":
+            return os.path.join(addon_dir, "fanart.png")
+        case _:
+            return ""
+
 def getjson(urlpath, urlbase="https://api.bilibili.com", params="", cookies=srt.get_cooks(), headers=heads):
     #if isinstance(params, dict): parmas = ts.dict2url(parmas)
     res = r.get(f"{urlbase}{urlpath}?{params}", cookies=cookies, headers=headers)
