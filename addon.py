@@ -20,7 +20,7 @@ except AttributeError:
 bili = c.bili
 
 # version
-version = "v1.0.31"
+version = "v1.0.33"
 debug = True
 
 # passfunc
@@ -314,26 +314,56 @@ def fav_con(mlid, page):
 def search_global(d):
     items = []
     
+    
     if d["page"] == 1:
         items.append({"label": ts.ctxt("搜用户", color="pink"), "path": bili.url_for("passfunc")})
         items.append({"label": ts.ctxt("搜番剧", color="pink"), "path": bili.url_for("passfunc")})
     
-    b = d["result"][3] # 番剧/影视
-    u = d["result"][5] # 用户/Up主
-    v = d["result"][8] # 一堆视频
+    """
+    haha终于可以登录状态下稳定返回内容啦
+    gemini 给了我一串 headers 就成了（以前总是卡在这里不知道该干什么好）
+    """
+    b = []
+    ft = []
+    u = []
+    v = []
+    for a in d["result"]:
+        if a["result_type"] == "video":
+            v = a
+        elif a["result_type"] == "bili_user":
+            u = a
+        elif a["result_type"] == "media_bangumi":
+            b = a
+        elif a["result_type"] == "media_ft":
+            ft = a
+    # b = d["result"][3] # 番剧
+    # u = d["result"][8] # 用户/Up主
+    # v = d["result"][11] # 一堆视频
     
+    # bangumi
     if len(b["data"]) != 0:
-        nb = b["data"][0]
-        label = ""
-        
-        plot = nb["desc"]
-        if nb["type"] == "media_bangumi":
-            label = ts.ctxt("[番剧] ", color="pink")
-        else:
-            label = ts.ctxt("[影视] ", color="yellow")
-        label += nb["title"]
-        items.append({"label": label, "icon": nb["cover"], "path": bili.url_for("passfunc"), "info": {"plot": plot}})
+        for nb in b["data"]:
+            label = ""
+            
+            plot = nb["desc"]
+            if nb["type"] == "media_bangumi":
+                label = ts.ctxt("[番剧] ", color="pink")
+
+            label += nb["title"]
+            items.append({"label": label, "icon": nb["cover"], "path": bili.url_for("passfunc"), "info": {"plot": plot, "genre": nb["styles"], "year": ts.ts2date(nb["pubtime"], ctype=1000)}})
     
+    # media_ft /Movies
+    if len(ft["data"]) != 0:
+        for nft in ft["data"]:
+            label = ""
+            label += ts.ctxt("["+nft["season_type_name"]+"] ", color="yellow")
+            label += nft["title"]
+            
+            plot = ""
+            plot += nft["desc"]
+            items.append({"label": label, "icon": nft["cover"], "path": bili.url_for("passfunc"), "info": {"plot": plot}})
+    
+    # Users
     if len(u["data"]) != 0:
         nu = u["data"][0]
         
@@ -343,26 +373,18 @@ def search_global(d):
         plot += f"\n{nu['usign']}"
         
         label = ts.ctxt("[用户] ", color="yellow") + nu["uname"]
-        items.append({"label": label, "icon": nu["upic"], "path": bili.url_for("user_page", uid=nu["mid"]), "info": {"plot": plot}})
+        items.append({"label": label, "icon": "https:"+nu["upic"], "path": bili.url_for("user_page", uid=nu["mid"]), "info": {"plot": plot}})
     
     # Videos
     for x in v["data"]:
-        items.append(c.get_viditem())
+        items.append(c.get_viditem(x))
+        # log(x)
     return items
     
 
 @bili.route("/search/<keyword>/<typ>/<page>")
 def search(keyword, typ, page):
     items = []
-    # autoinput
-    if typ == "all_input":
-        typ = "all"
-        keyboard = xbmc.Keyboard('', '请输入搜索内容')
-        keyboard.doModal()
-        if (keyboard.isConfirmed()):
-            keyword = keyboard.getText()
-        else:
-            return videos
     
     # urlpath/params
     urlpath = "/x/web-interface/wbi/search/all/v2"
@@ -374,18 +396,41 @@ def search(keyword, typ, page):
         urlpath = "/x/web-interface/wbi/search/type"
     
     # Get
-    res = c.getjson(urlpath, params=params)
+    header = {
+       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+       "Referer": "https://search.bilibili.com/all", # 搜索接口极其看重这个
+       "Origin": "https://search.bilibili.com"
+    }
+    params = ts.dict2url(srt.getwbikey(params))
+    res = c.getjson(urlpath, params=params, headers=header)
     if not isinstance(res, dict): return
     
     # 综合搜索
     if typ == "all":
         return search_global(res["data"])
+
+@bili.route("/search_input/")
+def search_input():
+    # autoinput
+    typ = "all"
+    keyboard = xbmc.Keyboard('', '请输入搜索内容')
+    keyboard.doModal()
+    if (keyboard.isConfirmed()):
+        keyword = keyboard.getText()
+    else:
+        return []
     
+    if not keyword.strip():
+        return []
+    
+    return search(keyword, "all", 1)
 
 @bili.route("/search_ready/")
 def search_ready():
     items = [
-      {"label": ts.ctxt("新搜索", color="yellow"), "path": bili.url_for("search", keyword="abx", typ="all_input", page=1)}
+      {"label": ts.ctxt("新搜索", color="yellow"), "path": bili.url_for("search_input", keyword="abx", typ="all_input", page=1)},
+      {"label": ts.ctxt("test_search", color="red"), "path": bili.url_for("search", keyword="熊出没", typ="all", page=1)},
+      {"label": ts.ctxt("test_search", color="red"), "path": bili.url_for("search", keyword="少女终末旅行", typ="all", page=1)}
     ]
     return items
 
