@@ -1,6 +1,6 @@
 # 如何使用本地 cookies 快捷导入账号
 1. 请使用你自己的方法获取账号 cookies 以及 refresh\_key，此处不提供详细方法 **（注意一定需要 cookies 和长期保存的 refresh\_key ，refresh\_key 如果不正确将可能导致部分功能无法正常使用！）**
-2. 在插件根目录下创建一个 cookies.json 的文件，并按照下方格式要求完成配置
+2. 在插件根目录下创建一个 cookies.json 的文件，并按照下方文件格式要求完成配置
 ```json
 {
   "cookies": {
