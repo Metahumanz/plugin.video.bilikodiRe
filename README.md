@@ -5,7 +5,6 @@
 我重生了，发现我找不到  
    kodi的b站客户端了  
 于是自己手搓这件事<br>
-Version: idk
 </center>
 
 [![Stars](https://img.shields.io/github/stars/Toad114514/plugin.video.bilikodiRe.svg)](https://github.com/Toad114514/plugin.video.bilikodiRe/status)
@@ -36,14 +35,15 @@ Bilikodi 的精神续作（其实是重构版，代码全重写）
    - 视频投稿内容
    - 收藏夹/内容查看
    - 关注列表
- - 搜索功能（半残）
+ - 搜索功能
+   - 综合搜索
+   - 本地历史搜索（没做）
  - 界面调整
    - 支持调整各种页面的单页显示数 (首页/关注列表/稿件)
    - 支持调整直接显示详细内容 (收藏夹)
    - 用户详细信息页面的背景设定
 # 已知问题
  - 默认收藏夹无法打开的bug
- - 搜索功能部分地区必须要求人机验证（我这里就是所以没办法测试搜索功能）
 # 鸣谢和声明
 [toad114514/plugin.video.bilikodi](https://github.com/toad114514/plugin.video.bilikodi) - 此项目的老豆，子承父业这一块  
 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) - 收集了大量的b站api用于本插件的运作（仓库已被叔叔爆破）  
