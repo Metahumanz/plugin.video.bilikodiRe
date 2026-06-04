@@ -28,16 +28,16 @@ jobs:
           # 检查当前提交是否有现成的 tag
           CURRENT_TAG=$(git tag --points-at HEAD | head -n 1 || echo "")
           
-          if [ -z "$CURRENT_TAG" ]; then
+          if [ ! -z "$CURRENT_TAG" ]; then
+            echo "检测到当前提交已推过 Tag: $CURRENT_TAG"
+            echo "NEW_TAG=$CURRENT_TAG" >> $GITHUB_ENV
+            echo "IS_PRERELEASE=false" >> $GITHUB_ENV
+          else
             # 如果没有 tag，则自动生成一个时间戳 tag
             GENERATED_TAG="Pre-$(date +'%Y.%m.%d-%H%M%S')"
             echo "当前提交没有 Tag，自动生成: $GENERATED_TAG"
             echo "NEW_TAG=$GENERATED_TAG" >> $GITHUB_ENV
             echo "IS_PRERELEASE=true" >> $GITHUB_ENV
-          else
-            echo "检测到当前提交已推过 Tag: $CURRENT_TAG"
-            echo "NEW_TAG=$CURRENT_TAG" >> $GITHUB_ENV
-            echo "IS_PRERELEASE=false" >> $GITHUB_ENV
           fi
 
       # ⚠️ 核心要求 2：列出和上次的 Releases 之间的所有提交（Changelog）
@@ -48,16 +48,16 @@ jobs:
           #LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           LAST_TAG=""
           
-          echo "## 说明" >> releases_notes.md
-          echo "此 Releases 由 Actions 自动生成，主要用于打包 zip 文件方便大家追溯版本  " >> releases_notes.md
+          echo "## 说明" >> release_notes.md
+          echo "此 Releases 由 Actions 自动生成，主要用于打包 zip 文件方便大家追溯版本  " >> release_notes.md
           if [ "${{ env.IS_PRERELEASE }}" = "true" ]; then
-            echo "**预览先行版本，也许有很多不稳定，也请火速Issue/pr帮助我😭** " >> releases_notes.md
+            echo "**预览先行版本，也许有很多不稳定，也请火速Issue/pr帮助我😭** " >> release_notes.md
           fi
           echo "发布时间 $(date +'%Y.%m.%d - %H:%M:%S')  " >> releases_notes.md
           echo ""
           
           
-          echo "### 📋 更新日志 (Change Log)" >> release_notes.md
+          echo "### 更新日志 (Change Log)" >> release_notes.md
           echo "" >> release_notes.md
           
           if [ -z "$LAST_TAG" ]; then
@@ -78,7 +78,7 @@ jobs:
           zip -r plugin.video.bilikodiRe.zip . -x "*.git*" "*.github*"
           
           ZIP_MD5=$(md5sum plugin.video.bilikodiRe.zip)
-          echo "md5sum:  " >> release_notes.md
+          echo "### md5sum  " >> release_notes.md
           echo "    ${ZIP_MD5}" >> release_notes.md
 
       # 4. 创建 Release 并上传 Zip 产物
