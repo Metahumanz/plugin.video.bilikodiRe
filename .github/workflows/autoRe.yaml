@@ -45,7 +45,8 @@ jobs:
         id: changelog
         run: |
           # 获取上一个 release 的 tag
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          #LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          LAST_TAG=""
           
           echo "## 说明" >> releases_notes.md
           echo "此 Releases 由 Actions 自动生成，主要用于打包 zip 文件方便大家追溯版本  " >> releases_notes.md
