@@ -1,0 +1,91 @@
+name: 自动发布 Release
+
+on:
+  push:
+    branches:
+      - master # 或者你的主分支名，比如 master
+
+jobs:
+  check-and-release:
+    runs-on: ubuntu-latest
+    # ⚠️ 核心要求 1：通过检查 commit 消息是否包含 "[R]" 来决定是否运行此任务
+    if: contains(github.event.head_commit.message, '[R]')
+    
+    steps:
+      # 1. 拉取完整仓库代码（fetch-depth: 0 表示拉取所有历史和标签，用于对比生成 Changelog）
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. 自动生成版本号（这里使用时间戳作为版本，你也可以根据需要修改）
+      - name: tags
+        id: tag
+        run: |
+          # 检查当前提交是否有现成的 tag
+          CURRENT_TAG=$(git tag --points-at HEAD | head -n 1)
+          
+          if [ -n "$CURRENT_TAG" ]; then
+            echo "检测到当前提交已推过 Tag: $CURRENT_TAG"
+            echo "NEW_TAG=$CURRENT_TAG" >> $GITHUB_ENV
+            echo "IS_PRERELEASE=false" >> $GITHUB_ENV
+          else
+            # 如果没有 tag，则自动生成一个时间戳 tag
+            GENERATED_TAG="v$(date +'%Y.%m.%d-%H%M%S')"
+            echo "当前提交没有 Tag，自动生成: $GENERATED_TAG"
+            echo "NEW_TAG=$GENERATED_TAG" >> $GITHUB_ENV
+            echo "IS_PRERELEASE=true" >> $GITHUB_ENV
+          fi
+
+      # ⚠️ 核心要求 2：列出和上次的 Releases 之间的所有提交（Changelog）
+      - name: changelog
+        id: changelog
+        run: |
+          # 获取上一个 release 的 tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          echo "## 说明"
+          echo "此 Releases 由 Actions 自动生成，主要用于打包 zip 文件方便大家追溯版本  " > releases_notes.md
+          if [ "${{ env.IS_PRERELEASE }}" = "true" ]; then
+            echo "**预览先行版本，也许有很多不稳定，也请火速Issue/pr帮助我😭** " > releases_notes.md
+          fi
+          echo "发布时间 $(date +'%Y.%m.%d - %H:%M:%S')  " > releases_notes.md
+          echo ""
+          
+          
+          echo "### 📋 更新日志 (Change Log)" > release_notes.md
+          echo "" >> release_notes.md
+          
+          if [ -z "$LAST_TAG" ]; then
+            echo "本仓库的第一个 Releases... 所以这些是此前的所有提交：  " >> release_notes.md
+            git log --pretty=format:"* %s (%h)" >> release_notes.md
+          else
+            git log ${LAST_TAG}..HEAD --pretty=format:"* %s (%h)" >> release_notes.md
+          fi
+          
+          # 打印调试
+          cat release_notes.md
+
+      # ⚠️ 核心要求 3：自动打包成 zip 文件
+      - name: package
+        run: |
+          # 假设你要打包整个项目，排除掉 .git 和 .github 目录
+          # 你可以把 "." 换成你要打包的具体文件夹路径（如 "./dist"）
+          zip -r plugin.video.bilikodiRe.zip . -x "*.git*" "*.github*"
+          
+          ZIP_MD5=$(md5sum plugin.video.bilikodiRe.zip)
+          echo "md5sum:  " > release_notes.md
+          echo "    ${ZIP_MD5}" > release_notes.md
+
+      # 4. 创建 Release 并上传 Zip 产物
+      - name: push Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.NEW_TAG }}
+          name: "${{ env.NEW_TAG }}"
+          body_path: release_notes.md # 将刚才生成的 Changelog 写入 Release 正文
+          prerelease: ${{ env.IS_PRERELEASE }}
+          files: |
+            plugin.video.bilikodiRe.zip # 上传打包好的 zip 文件
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 官方自带，无需手动配置
