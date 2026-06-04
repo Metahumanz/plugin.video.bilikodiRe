@@ -31,7 +31,7 @@ jobs:
             echo "IS_PRERELEASE=false" >> $GITHUB_ENV
           else
             # 如果没有 tag，则自动生成一个时间戳 tag
-            GENERATED_TAG="v$(date +'%Y.%m.%d-%H%M%S')"
+            GENERATED_TAG="Pre-$(date +'%Y.%m.%d-%H%M%S')"
             echo "当前提交没有 Tag，自动生成: $GENERATED_TAG"
             echo "NEW_TAG=$GENERATED_TAG" >> $GITHUB_ENV
             echo "IS_PRERELEASE=true" >> $GITHUB_ENV
