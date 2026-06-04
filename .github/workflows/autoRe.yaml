@@ -88,4 +88,4 @@ jobs:
           files: |
             plugin.video.bilikodiRe.zip # 上传打包好的 zip 文件
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 官方自带，无需手动配置
+          GITHUB_TOKEN: ${{ secrets.RELEASES_TOKEN }} # 官方自带，无需手动配置
