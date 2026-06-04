@@ -5,6 +5,9 @@ on:
     branches:
       - master # 或者你的主分支名，比如 master
 
+permissions:
+  contents: write
+
 jobs:
   check-and-release:
     runs-on: ubuntu-latest
@@ -25,7 +28,7 @@ jobs:
           # 检查当前提交是否有现成的 tag
           CURRENT_TAG=$(git tag --points-at HEAD | head -n 1)
           
-          if [ -n "$CURRENT_TAG" ]; then
+          if [ ! -z "$CURRENT_TAG" ]; then
             echo "检测到当前提交已推过 Tag: $CURRENT_TAG"
             echo "NEW_TAG=$CURRENT_TAG" >> $GITHUB_ENV
             echo "IS_PRERELEASE=false" >> $GITHUB_ENV
