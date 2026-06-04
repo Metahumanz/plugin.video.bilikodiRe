@@ -86,6 +86,6 @@ jobs:
           body_path: release_notes.md # 将刚才生成的 Changelog 写入 Release 正文
           prerelease: ${{ env.IS_PRERELEASE }}
           files: |
-            plugin.video.bilikodiRe.zip # 上传打包好的 zip 文件
+            plugin.video.bilikodiRe.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASES_TOKEN }} # 官方自带，无需手动配置
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 官方自带，无需手动配置
