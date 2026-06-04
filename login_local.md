@@ -12,3 +12,5 @@
 }
 ```
 3. 启动 Kodi -> 设置 -> 插件 -> 找到 Bilikodi Reborn -> 插件设置，在登录选项选择 “导入 cookies.json 登录” 并点击是。如果检测到 cookies 可用会自动使用此账号登陆，并自动保存 cookies 和 refresh\_key
+
+* 注意：在导入完成之后，建议将 cookies.json 直接一整个删除。防止有人直接偷。*
