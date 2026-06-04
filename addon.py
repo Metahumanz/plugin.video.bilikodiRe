@@ -311,11 +311,10 @@ def fav_con(mlid, page):
 ########################
 # 搜索 Search
 
-def search_global(d):
+def search_global(d, kw, typ):
     items = []
     
-    
-    if d["page"] == 1:
+    if d["page"] == 1 and typ == "all":
         items.append({"label": ts.ctxt("搜用户", color="pink"), "path": bili.url_for("passfunc")})
         items.append({"label": ts.ctxt("搜番剧", color="pink"), "path": bili.url_for("passfunc")})
     
@@ -379,6 +378,11 @@ def search_global(d):
     for x in v["data"]:
         items.append(c.get_viditem(x))
         # log(x)
+    
+    # 我错了全局搜索api没有翻页功能
+    # if d["page"] < d["numPages"]:
+        # label = ts.ctxt(f"下一页 ({d['page']}/{d['numPages']}", color="yellow")
+        # items.append({"label": label, "path": bili.url_for("search", keyword=kw, typ="all", page=d['page']+1)})
     return items
     
 
@@ -389,7 +393,7 @@ def search(keyword, typ, page):
     # urlpath/params
     urlpath = "/x/web-interface/wbi/search/all/v2"
     params = {
-        "keyword": keyword
+        "keyword": keyword,
     }
     if typ != "all":
         params["search_type"] = typ
@@ -407,7 +411,7 @@ def search(keyword, typ, page):
     
     # 综合搜索
     if typ == "all":
-        return search_global(res["data"])
+        return search_global(res["data"], keyword, typ)
 
 @bili.route("/search_input/")
 def search_input():
@@ -578,10 +582,10 @@ def open_set():
 # help
 @bili.route("/help/")
 def help():
-    a = f"到达流媒体飞沫天 ~ Bilikodi Reborn {version}\n"
+    a = f"无人问津的客户端 ~ Bilikodi Reborn {version}\n"
     a += "重构的 Bilikodi 打赢复活赛，基于bilibili-api实现\n"
     a += "应该适用于 Kodi 19~22 所有版本\n"
-    a += "搜索中文关键词请使用中文输入法或者其他辅助插件"
+    a += "搜索中文关键词请使用中文输入法或者自动补全插件"
     xbmcgui.Dialog().ok("帮助/说明", a)
 
 if __name__ == "__main__":

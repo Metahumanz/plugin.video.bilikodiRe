@@ -52,7 +52,7 @@ jobs:
           if [ "${{ env.IS_PRERELEASE }}" = "true" ]; then
             echo "**预览先行版本，也许有很多不稳定，也请火速Issue/pr帮助我😭** " >> release_notes.md
           fi
-          echo "发布时间 $(date +'%Y.%m.%d - %H:%M:%S')  " >> releases_notes.md
+          echo "发布时间 $(date +'%Y.%m.%d - %H:%M:%S')  " >> release_notes.md
           echo ""
           
           
@@ -67,6 +67,7 @@ jobs:
           fi
           
           # 打印调试
+          echo "" >> release_notes.md
           cat release_notes.md
 
       # ⚠️ 核心要求 3：自动打包成 zip 文件
