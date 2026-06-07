@@ -412,6 +412,8 @@ def search_global(d, kw, typ):
     
     # Videos
     for x in v["data"]:
+        if "live_status" in x and x["live_status"] == 1:
+            continue
         items.append(c.get_viditem(x))
     return items
     
