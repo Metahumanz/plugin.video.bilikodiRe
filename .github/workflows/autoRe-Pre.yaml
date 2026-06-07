@@ -1,4 +1,4 @@
-name: 自动发布 Release
+name: 自动发布 Release (预发行)
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
   check-and-release:
     runs-on: ubuntu-latest
     # ⚠️ 核心要求 1：通过检查 commit 消息是否包含 "[R]" 来决定是否运行此任务
-    if: contains(github.event.head_commit.message, '[R]')
+    if: contains(github.event.head_commit.message, '[Pre]')
     
     steps:
       # 1. 拉取完整仓库代码（fetch-depth: 0 表示拉取所有历史和标签，用于对比生成 Changelog）
@@ -25,9 +25,11 @@ jobs:
       - name: tags
         id: tag
         run: |
-          # 检查当前提交是否有现成的 tag
-          CURRENT_TAG=$(git tag --points-at HEAD | head -n 1 || echo "")
-          echo "NEW_TAG=$CURRENT_TAG" >> $GITHUB_ENV
+          # 如果没有 tag，则自动生成一个时间戳 tag
+          GENERATED_TAG="pre-$(date +'%Y%m%d-%H%M%S')"
+          echo "当前提交没有 Tag，自动生成: $GENERATED_TAG"
+          echo "NEW_TAG=$GENERATED_TAG" >> $GITHUB_ENV
+          echo "IS_PRERELEASE=true" >> $GITHUB_ENV
 
       # ⚠️ 核心要求 2：列出和上次的 Releases 之间的所有提交（Changelog）
       - name: changelog
@@ -38,6 +40,7 @@ jobs:
           
           echo "## 说明" >> release_notes.md
           echo "此 Releases 由 Actions 自动生成，主要用于打包 zip 文件方便大家追溯版本  " >> release_notes.md
+          echo "**预览先行版本，也许有很多不稳定，也请火速Issue/pr帮助我😭**  " >> release_notes.md
           echo "发布时间 $(date +'%Y.%m.%d - %H:%M:%S')  " >> release_notes.md
           echo ""
           
@@ -74,7 +77,7 @@ jobs:
           tag_name: ${{ env.NEW_TAG }}
           name: "${{ env.NEW_TAG }}"
           body_path: release_notes.md # 将刚才生成的 Changelog 写入 Release 正文
-          prerelease: false
+          prerelease: true
           files: |
             plugin.video.bilikodiRe.zip
         env:
