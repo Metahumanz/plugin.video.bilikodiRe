@@ -311,12 +311,48 @@ def fav_con(mlid, page):
 ########################
 # 搜索 Search
 
+def search_type(d, kw, typ):
+    items = []
+    
+    try:
+        resu = d["result"]
+    except:
+        return items
+    # video
+    if typ == "video":
+        for x in resu:
+            items.append(c.get_viditem(x))
+    
+    if typ == "media_bangumi":
+        for nb in resu:
+            label = ""
+            
+            plot = nb["desc"]
+            if nb["type"] == "media_bangumi":
+                label = ts.ctxt("[番剧] ", color="pink")
+
+            label += nb["title"]
+            items.append({"label": label, "icon": nb["cover"], "path": bili.url_for("passfunc"), "info": {"plot": plot, "genre": nb["styles"], "year": ts.ts2date(nb["pubtime"], ctype=1000)}})
+    
+    if typ == "bili_user":
+        for nu in resu:
+            plot = ""
+            plot += f"uid: {nu['mid']}\n"
+            plot += f"{nu['fans']} 粉丝 | {nu['videos']} 投稿 | Lv{nu['level']}\n"
+            plot += f"\n{nu['usign']}"
+            
+            label = ts.ctxt("[用户] ", color="yellow") + nu["uname"]
+            items.append({"label": label, "icon": "https:"+nu["upic"], "path": bili.url_for("user_page", uid=nu["mid"]), "info": {"plot": plot}})
+    
+    return items
+
 def search_global(d, kw, typ):
     items = []
     
     if d["page"] == 1 and typ == "all":
-        items.append({"label": ts.ctxt("搜用户", color="pink"), "path": bili.url_for("passfunc")})
-        items.append({"label": ts.ctxt("搜番剧", color="pink"), "path": bili.url_for("passfunc")})
+        items.append({"label": ts.ctxt("搜视频", color="pink"), "path": bili.url_for("search", keyword=kw, typ="video", page=1)})
+        items.append({"label": ts.ctxt("搜用户", color="pink"), "path": bili.url_for("search", keyword=kw, typ="bili_user", page=1)})
+        items.append({"label": ts.ctxt("搜番剧", color="pink"), "path": bili.url_for("search", keyword=kw, typ="media_bangumi", page=1)})
     
     """
     haha终于可以登录状态下稳定返回内容啦
@@ -377,12 +413,6 @@ def search_global(d, kw, typ):
     # Videos
     for x in v["data"]:
         items.append(c.get_viditem(x))
-        # log(x)
-    
-    # 我错了全局搜索api没有翻页功能
-    # if d["page"] < d["numPages"]:
-        # label = ts.ctxt(f"下一页 ({d['page']}/{d['numPages']}", color="yellow")
-        # items.append({"label": label, "path": bili.url_for("search", keyword=kw, typ="all", page=d['page']+1)})
     return items
     
 
@@ -397,6 +427,7 @@ def search(keyword, typ, page):
     }
     if typ != "all":
         params["search_type"] = typ
+        params["page"] = page
         urlpath = "/x/web-interface/wbi/search/type"
     
     # Get
@@ -412,6 +443,8 @@ def search(keyword, typ, page):
     # 综合搜索
     if typ == "all":
         return search_global(res["data"], keyword, typ)
+    else:
+        return search_type(res["data"], keyword, typ)
 
 @bili.route("/search_input/")
 def search_input():
@@ -432,8 +465,8 @@ def search_input():
 @bili.route("/search_ready/")
 def search_ready():
     items = [
-      {"label": ts.ctxt("新搜索", color="yellow"), "path": bili.url_for("search_input", keyword="abx", typ="all_input", page=1)},
-      {"label": ts.ctxt("test_search", color="red"), "path": bili.url_for("search", keyword="熊出没", typ="all", page=1)},
+      {"label": ts.ctxt("新搜索", color="yellow"), "path": bili.url_for("search_input")},
+      {"label": ts.ctxt("test_search", color="red"), "path": bili.url_for("search", keyword="籽岷", typ="all", page=1)},
       {"label": ts.ctxt("test_search", color="red"), "path": bili.url_for("search", keyword="少女终末旅行", typ="all", page=1)}
     ]
     return items

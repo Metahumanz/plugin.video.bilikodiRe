@@ -40,6 +40,7 @@ Bilikodi 的精神续作（其实是重构版，代码全重写）
    - 关注列表
  - 搜索功能
    - 综合搜索
+   - 分类搜索 (用户/视频/番剧)
    - 本地历史搜索（没做）
  - 界面调整
    - 支持调整各种页面的单页显示数 (首页/关注列表/稿件)
@@ -49,7 +50,7 @@ Bilikodi 的精神续作（其实是重构版，代码全重写）
  - 默认收藏夹无法打开的bug
 # 鸣谢和声明
 [toad114514/plugin.video.bilikodi](https://github.com/toad114514/plugin.video.bilikodi) - 此项目的老豆，子承父业这一块  
-[pskdje/bilibili-API-collect](https://github.com/pskdje/bilibili-API-collect) - 收集了大量的b站api用于本插件的运作（原 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) 仓库已被蜀黍爆破） 
+[pskdje/bilibili-API-collect](https://github.com/pskdje/bilibili-API-collect) - 收集了大量的b站api用于本插件的运作（原 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) 仓库已被蜀黍爆破）   
 [chen310/plugin.video.bili](https://github.com/chen310/plugin.video.bili) - 代码参考  
 本插件使用了 MIT License 开源协议，用户造成的任何问题导致 无法访问/B站号被封/IP封禁/小黑屋/78被砍/九蓝一金/在上层饿死/变成爱牛/宇宙大爆炸 等问题都与原作者无关。  
 本插件与哔哩哔哩官方没有任何关系，本项目也没有受到哔哩哔哩官方的允许和支持。  
