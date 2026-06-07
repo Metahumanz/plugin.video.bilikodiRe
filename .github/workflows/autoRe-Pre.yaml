@@ -26,7 +26,7 @@ jobs:
         id: tag
         run: |
           # 如果没有 tag，则自动生成一个时间戳 tag
-          GENERATED_TAG="pre-$(date +'%Y%m%d-%H%M%S')"
+          GENERATED_TAG="Pre-$(date +'%Y%m%d-%H%M%S')"
           echo "当前提交没有 Tag，自动生成: $GENERATED_TAG"
           echo "NEW_TAG=$GENERATED_TAG" >> $GITHUB_ENV
           echo "IS_PRERELEASE=true" >> $GITHUB_ENV
@@ -41,7 +41,7 @@ jobs:
           echo "## 说明" >> release_notes.md
           echo "此 Releases 由 Actions 自动生成，主要用于打包 zip 文件方便大家追溯版本  " >> release_notes.md
           echo "**预览先行版本，也许有很多不稳定，也请火速Issue/pr帮助我😭**  " >> release_notes.md
-          echo "发布时间 $(date +'%Y.%m.%d - %H:%M:%S')  " >> release_notes.md
+          echo "发布时间 $(date +'%Y.%m.%d %H:%M:%S') (UTC) " >> release_notes.md
           echo ""
           
           
