@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.bilikodiRe" name="bilikodi Reborn" version="1.0.33" provider-name="toadXtech64-Evolution">
+<addon id="plugin.video.bilikodiRe" name="bilikodi Reborn" version="1.5.0" provider-name="toadXtech64-Evolution">
   <requires>
-    <import addon="xbmc.python" version="3.0.0"/>
+    <import addon="xbmc.python" version="3.0.1"/>
     <import addon="script.module.requests" version="2.12.4"/>
     <import addon="script.module.xbmcswift2" version="2.4.0"/>
     <import addon="script.module.pyqrcode" version="1.2.0"/>
-    <import addon="inputstream.adaptive" version="0.0.67"/>
+    <import addon="inputstream.adaptive" version="21.0.0"/>
   </requires>
   <extension point="xbmc.python.pluginsource" library="addon.py">
     <provides>video</provides>
   </extension>
+  <extension point="xbmc.service" library="service.py"/>
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
     <summary lang="en">A "New" Unofficial third-party bilibili client on kodi</summary>
@@ -40,6 +41,51 @@ Should support Kodi 19/20/21/22
 本插件仅供学习参考使用，本插件不会通过任何手段收集你的信息。
     </disclaimer>
   <news>
+- v1.5.0
+ Kodi 21 / Raspberry Pi 4 原生 DASH 播放层，HEVC 优先、AV1 默认禁用
+ “最高”画质支持 qn=125 HEVC Main10 HDR，并限制到 Pi4 兼容帧率
+ 新增推荐直播和关注直播，直播流继续交给 Kodi 原生 Player
+ 直播画质最高请求 qn=20000，Pi4 自动选择兼容 HEVC 2K/4K 并避开高分辨率 AVC、AV1
+ 直播 WebSocket 弹幕转换为 Kodi 原生 ASS 字幕，复用字号、透明度、区域和防重叠设置
+ 修复直播两分钟后上下文过期导致弹幕停止
+ 视频动态增加发布时间、UP 主和动态附言，改善遥控器浏览信息
+ 视频动态首页直接列出已关注且正在直播的主播
+ 弹幕不透明度同时作用于文字和描边，新增跨类型防重叠轨道
+ 互动写请求刷新并持久化浏览器会话 Cookie，补齐 Origin/Referer 且禁止危险自动重试
+ 收藏夹跳过删除、私密或失效稿件，单条坏数据不再导致整页打不开
+ Kodi 主页哔哩哔哩入口改为四列卡片网格并修正焦点进入路径
+- v1.4.4
+ 返回 Kodi 主页时停止所有视频，全屏播放按返回键执行 Kodi 原生停止
+ 支持以用户级 Estuary 派生皮肤在主页左栏增加“哔哩哔哩”入口
+- v1.4.3
+ 新增“点击视频时”设置，可统一选择进入详情页或直接播放
+ 详情页第一项明确显示为“立即播放”，播放仍使用 Kodi 原生 Player
+- v1.4.2
+ 修复遥控器返回键直接退出插件：视频列表中返回现在等同于“..”，全屏播放行为不变
+- v1.4.1
+ 收藏夹中的视频改为点击即播放，视频详情保留在右键/长按菜单
+- v1.4.0
+ 视频详情页新增点赞、投币、收藏夹选择和一键三连
+ 支持把插件作为 Kodi 视频来源直接放在主界面入口
+- v1.3.4
+ Pi4 选流过滤超过 60fps 的 DASH Representation，120fps 视频自动降级到兼容画质
+- v1.3.3
+ 修复二维码登录成功后的目录错误，并让进度服务立即读取新登录态
+- v1.3.2
+ 修复 Kodi 缓存登录目录导致二维码过期后无法刷新的问题
+- v1.3.1
+ 清理搜索结果高亮标签，未登录页面引导二维码登录，默认启用 Kodi ASS 弹幕
+- v1.3.0
+ 新增历史、稍后再看、动态、分P/合集/番剧、相关推荐和进度回传
+ 修正低于 720P 时编码偏好导致的不合理降清晰度
+- v1.2.0
+ 新增 Pi4 画质/编码/AV1/降级设置
+ 新增 Kodi ASS 弹幕字幕与播放进度回传
+- v1.1.1
+ 修复 xbmcswift2 覆盖 DASH resolved URL 导致 Kodi 跳过播放的问题
+- v1.1.0
+ Kodi 21 InputStream Adaptive DASH 播放
+ Pi 4 默认 HEVC 优先、AV1 禁用，并支持独立音视频 MPD
 - v1.0.33
  搜索功能复活！（目前已完成综合搜索）
 - v1.0.32

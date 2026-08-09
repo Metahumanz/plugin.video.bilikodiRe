@@ -1,3 +1,8 @@
 cookies.json
 tmp
-core/__pycache__
+__pycache__/
+*.py[cod]
+dist/
+*.log
+artifacts/
+.pytest_cache/

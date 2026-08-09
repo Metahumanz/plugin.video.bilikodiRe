@@ -294,3 +294,131 @@ msgstr "安装 inputstream.adaptive 插件"
 msgctxt "#30132"
 msgid "This feature requires the inputstream.adaptive plugin. When disabled, the maximum video resolution is limited to 720P."
 msgstr "此功能需要安装 inputstream.adaptive 插件。禁用后，视频最高分辨率将限制为 720P"
+
+msgctxt "#30200"
+msgid "Default video quality"
+msgstr "默认画质"
+
+msgctxt "#30201"
+msgid "Auto"
+msgstr "自动"
+
+msgctxt "#30202"
+msgid "1080P"
+msgstr "1080P"
+
+msgctxt "#30203"
+msgid "1080P60"
+msgstr "1080P60"
+
+msgctxt "#30204"
+msgid "4K"
+msgstr "4K"
+
+msgctxt "#30205"
+msgid "Highest"
+msgstr "最高"
+
+msgctxt "#30206"
+msgid "Preferred video codec"
+msgstr "编码偏好"
+
+msgctxt "#30207"
+msgid "Prefer HEVC"
+msgstr "HEVC 优先"
+
+msgctxt "#30208"
+msgid "Prefer AVC"
+msgstr "AVC 优先"
+
+msgctxt "#30209"
+msgid "Allow AV1 fallback"
+msgstr "允许 AV1（Pi4 默认关闭）"
+
+msgctxt "#30210"
+msgid "Automatically select the highest compatible stream"
+msgstr "自动选择最高兼容流"
+
+msgctxt "#30211"
+msgid "Fall back when target quality is unavailable"
+msgstr "目标画质不存在时自动向下降级"
+
+msgctxt "#30220"
+msgid "Danmaku subtitles"
+msgstr "弹幕字幕"
+
+msgctxt "#30221"
+msgid "Enable danmaku"
+msgstr "启用弹幕"
+
+msgctxt "#30222"
+msgid "Danmaku font size"
+msgstr "弹幕字号"
+
+msgctxt "#30223"
+msgid "Danmaku opacity"
+msgstr "弹幕不透明度"
+
+msgctxt "#30224"
+msgid "Danmaku display area"
+msgstr "弹幕显示区域"
+
+msgctxt "#30225"
+msgid "Scrolling danmaku"
+msgstr "滚动弹幕"
+
+msgctxt "#30226"
+msgid "Top danmaku"
+msgstr "顶部弹幕"
+
+msgctxt "#30227"
+msgid "Bottom danmaku"
+msgstr "底部弹幕"
+
+msgctxt "#30228"
+msgid "Prevent danmaku overlap"
+msgstr "弹幕互不遮挡"
+
+msgctxt "#30229"
+msgid "Uses shared display lanes for all danmaku types. Excess comments are discarded when every lane is occupied."
+msgstr "滚动、顶部和底部弹幕共用显示轨道；轨道全满时丢弃过密弹幕，避免互相遮挡。"
+
+msgctxt "#30230"
+msgid "Back returns to the parent video list"
+msgstr "返回键回到视频列表上一级"
+
+msgctxt "#30231"
+msgid "Makes Back act like the visible parent-directory item in Kodi video lists. Restart Kodi after changing this setting."
+msgstr "让返回键在 Kodi 视频列表中等同于最上方的“..”。修改后请重启 Kodi。"
+
+msgctxt "#30232"
+msgid "Navigation"
+msgstr "导航"
+
+msgctxt "#30233"
+msgid "When a video is selected"
+msgstr "点击视频时"
+
+msgctxt "#30234"
+msgid "Open video details"
+msgstr "进入视频详情页"
+
+msgctxt "#30235"
+msgid "Play immediately"
+msgstr "直接播放"
+
+msgctxt "#30236"
+msgid "Stop videos on Kodi Home"
+msgstr "回到 Kodi 主页时停止所有视频"
+
+msgctxt "#30237"
+msgid "Stops any active video after Kodi enters its Home screen."
+msgstr "进入 Kodi 主界面后停止正在播放的视频，不让视频在后台继续播放。"
+
+msgctxt "#30238"
+msgid "Stop videos when leaving the player with Back"
+msgstr "从播放器返回时停止所有视频"
+
+msgctxt "#30239"
+msgid "Maps Back to Kodi's native Stop action only while video is fullscreen."
+msgstr "仅在全屏播放时让返回键执行 Kodi 原生停止；视频列表中的返回键仍回到上一级。"

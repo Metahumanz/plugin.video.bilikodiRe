@@ -1,57 +1,163 @@
-# Bilikodi Reborn
+# Bilikodi Reborn · Kodi 21 / Raspberry Pi 4 增强版
 
-<center>
-<img src="https://raw.github.com/Toad114514/plugin.video.bilikodiRe/refs/heads/master/icon.png" width="150" height="150"/>
-我重生了，发现我找不到  
-   kodi的b站客户端了  
-于是自己手搓这件事<br>
-</center>
+![Bilikodi Reborn](icon.png)
 
-[![Stars](https://img.shields.io/github/stars/Toad114514/plugin.video.bilikodiRe.svg)](https://github.com/Toad114514/plugin.video.bilikodiRe/status)
-[![Forks](https://img.shields.io/github/forks/Toad114514/plugin.video.bilikodiRe.svg)](https://github.com/Toad114514/plugin.video.bilikodiRe/network/members)
-[![Issues](https://img.shields.io/github/issues/Toad114514/plugin.video.bilikodiRe.svg)](https://github.com/Toad114514/plugin.video.bilikodiRe/issues)
-![Static Badge](https://img.shields.io/badge/Kodi-19.x_Matrix-blue?logo=kodi)
-[![Python](https://img.shields.io/badge/language-Python%203-blue.svg)](https://www.python.org)  
-![GitHub Release](https://img.shields.io/github/v/release/Toad114514/plugin.video.bilikodiRe?display_name=release)
-![GitHub Pre-Release](https://img.shields.io/github/v/release/Toad114514/plugin.video.bilikodiRe?include_prereleases&display_name=release)
-# 简介
-神秘的**非第三方**b站客户端的 Kodi 插件  
-Bilikodi 的精神续作（其实是重构版，代码全重写）  
-允许你在kodi上任意浏览b站上的视频  
-支持 Kodi 19 Matrix 及以上
-# 特性
- - 登录/隐私
-   - 二维码登录
-   - 快捷导入/导出 Cookie [如何通过导入 Cookie 登录](login_local.md)
-   - 允许不记录历史
-   - 允许临时关闭账号使用游客登录
-   - 自动更新 buvid3（作者测试时被风控拦截，所以在设置给了开关）
- - 首页推荐
-   - 支持调整内容相关性
- - 入站必刷
- - 视频/稿件相关
-   - Dash (1080+) \[beta测试 暂时不开放\]
-   - Legacy mp4 (旧版 Bilikodi 方案, 默认 720p)
-   - 允许跳转到 Up 主
- - Up主/用户
-   - 用户详细元数据
-   - 视频投稿内容
-   - 收藏夹/内容查看
-   - 关注列表
- - 搜索功能
-   - 综合搜索
-   - 分类搜索 (用户/视频/番剧)
-   - 本地历史搜索（没做）
- - 界面调整
-   - 支持调整各种页面的单页显示数 (首页/关注列表/稿件)
-   - 支持调整直接显示详细内容 (收藏夹)
-   - 用户详细信息页面的背景设定
-# 已知问题
- - 默认收藏夹无法打开的bug
-# 鸣谢和声明
-[toad114514/plugin.video.bilikodi](https://github.com/toad114514/plugin.video.bilikodi) - 此项目的老豆，子承父业这一块  
-[pskdje/bilibili-API-collect](https://github.com/pskdje/bilibili-API-collect) - 收集了大量的b站api用于本插件的运作（原 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) 仓库已被蜀黍爆破）   
-[chen310/plugin.video.bili](https://github.com/chen310/plugin.video.bili) - 代码参考  
-本插件使用了 MIT License 开源协议，用户造成的任何问题导致 无法访问/B站号被封/IP封禁/小黑屋/78被砍/九蓝一金/在上层饿死/变成爱牛/宇宙大爆炸 等问题都与原作者无关。  
-本插件与哔哩哔哩官方没有任何关系，本项目也没有受到哔哩哔哩官方的允许和支持。  
-本插件仅供学习参考使用，不会通过任何手段收集你的信息。
+这是一个面向 Kodi 的非官方 Bilibili 客户端。本分支基于
+[`Toad114514/plugin.video.bilikodiRe`](https://github.com/Toad114514/plugin.video.bilikodiRe)，
+重点补全 Kodi 21、Raspberry Pi 4、DASH、直播、弹幕和遥控器使用体验。
+
+项目坚持使用 Kodi 原生播放链路：不调用 mpv，不预下载或合并音视频，不创建
+自定义播放器窗口，也不修改 Kodi、FFmpeg、DRM/KMS 或系统硬解配置。
+
+## 功能概览
+
+### 视频播放
+
+- Bilibili DASH 独立视频、音频轨交给 InputStream Adaptive 和 Kodi Player。
+- Raspberry Pi 4 默认按 `HEVC > AVC > AV1` 选择编码，AV1 默认禁用。
+- “最高”画质支持 B站 `qn=125` HDR，只接受 Pi 4 可解码的 HEVC Main10、约
+  60fps 以内流；不可用时自动向下选择兼容画质。
+- 支持 4K60、4K、1080P60、1080P、720P 等画质上限和安全降级。
+- 播放进度可定时回传；暂停、拖动、快进/快退和退出均保持 Kodi 原生行为。
+
+播放链路：
+
+```text
+BV/aid → cid → playurl API → dash.video[] / dash.audio[]
+       → Pi 4 兼容选流 → 本地临时 MPD → InputStream Adaptive → Kodi Player
+```
+
+### 弹幕与直播
+
+- 普通视频弹幕由 B站 XML 转换成 Kodi 原生 ASS 外挂字幕。
+- 直播弹幕通过 B站 WebSocket 实时接收并转换成轮换 ASS 字幕。
+- 字号、透明度、显示区域、弹幕类型和跨类型防重叠轨道可配置。
+- 直播最高请求 `qn=20000`；2K/4K 只选择 HEVC，遇到高分辨率 AVC 或 AV1 时
+  自动降级到 Pi 4 安全画质。
+- 直播弹幕连接支持心跳和重连，长时间播放不会因临时识别上下文过期而停止。
+
+### 浏览与账户
+
+- 首页推荐、入站必刷、搜索、历史、稍后再看、收藏夹、关注、投稿和视频动态。
+- 动态首页可直接进入已关注且正在直播的主播房间。
+- 视频详情页包含立即播放、分P、合集、UP 主、相关推荐、点赞、投币、收藏和
+  一键三连。
+- 收藏夹会跳过已删除、私密或失效稿件，不会因单条坏数据导致整页打不开。
+- 互动写请求会刷新官方视频页会话并持久化必要 Cookie；投币和三连不会自动
+  重试，避免重复提交。
+- 支持二维码登录及二维码过期刷新。
+
+### Kodi 与遥控器体验
+
+- 可设置点击视频后直接播放或先进入详情页。
+- 视频列表中的返回键进入上一级，全屏播放返回键执行 Kodi 原生停止。
+- 返回 Kodi 主页时可停止正在播放的视频，避免后台继续播放。
+- 提供用户级 Estuary 派生皮肤安装工具，可在 Kodi 主页增加“哔哩哔哩”入口，
+  不覆盖系统皮肤。
+
+## 环境要求
+
+- Kodi 21；当前硬件重点验证 Raspberry Pi 4B。
+- 已安装并启用 `inputstream.adaptive` 21.x。
+- Python 3 Kodi 插件环境及 `requests`、`xbmcswift2`、`pyqrcode` 依赖。
+- 1080P 以上、4K 或 HDR 能否获得取决于账号权限和视频源。
+
+## 安装
+
+1. 将仓库内容打包为目录名为 `plugin.video.bilikodiRe` 的 Kodi 插件 zip，或复制到
+   Kodi 用户插件目录。
+2. 在 Kodi 中确认 InputStream Adaptive 已安装并启用。
+3. 安装/更新插件后重启一次 Kodi，使本地 MPD 与播放进度 service 启动。
+4. 打开插件设置，通过二维码登录并执行“检测登录状态”。
+5. Raspberry Pi 4 建议保持默认的 HEVC 优先和 AV1 禁用设置。
+
+完整的 DASH、硬解、DRM/KMS、直播和互动验收步骤见
+[TESTING_PI4.md](TESTING_PI4.md)。
+
+## 设置说明
+
+| 分类 | 主要选项 | 建议值 |
+| --- | --- | --- |
+| 画质 | 最高/4K/1080P60/1080P/720P | 有权限时使用“最高” |
+| 编码 | HEVC/AVC | Pi 4 使用 HEVC |
+| AV1 | 是否允许 | Pi 4 关闭 |
+| 弹幕 | 字号、透明度、区域、类型、防重叠 | 按电视观看距离调整 |
+| 导航 | 列表返回、全屏返回、回主页停止 | 遥控器环境建议开启 |
+| 视频点击 | 详情页/直接播放 | 任选，所有视频列表统一生效 |
+
+## 开发与测试
+
+项目的播放代码位于：
+
+```text
+resources/lib/playback/
+├── stream_selector.py   # DASH 画质与编码选择
+├── dash.py              # MPD 与 Kodi resolved URL
+├── manifest_server.py   # 本地临时 MPD 服务
+├── danmaku.py           # 普通视频 ASS 弹幕
+├── live.py              # 直播选流
+├── live_danmaku.py      # 直播 WebSocket 与轮换 ASS
+├── progress.py          # 播放上下文与进度
+└── settings.py          # 播放设置映射
+```
+
+运行回归测试：
+
+```powershell
+python -m unittest discover -s tests -v
+python -m compileall -q addon.py service.py core resources tests
+```
+
+提交问题时请删除日志中的 Cookie、令牌、局域网地址、用户名和本地绝对路径。仓库
+默认忽略 `cookies.json`、日志、构建包、缓存和测试产物。
+
+## PuTTY 共享连接：免重复认证的远程开发
+
+PuTTY 可以让 `plink` 和 `pscp` 复用一条已经人工认证的 SSH upstream。它不是把
+密码写进脚本，而是让后续批处理连接共享现有会话，适合频繁上传插件和读取 Kodi
+日志。
+
+1. 在 PuTTY 保存一个会话，并在 `Connection > SSH > Sharing` 中允许连接共享。
+2. 用 PuTTY 正常打开该会话并人工完成认证，保持这个 upstream 窗口在线。
+3. 脚本先用 `-shareexists` 检查共享连接，失败时立即停止。
+4. 后续命令统一使用 `-batch -load`；不要使用 `-pw`、密码文件或脚本内密码。
+
+脱敏的 PowerShell 示例：
+
+```powershell
+$plink = Join-Path $env:ProgramFiles 'PuTTY\plink.exe'
+$pscp  = Join-Path $env:ProgramFiles 'PuTTY\pscp.exe'
+$session = '<saved-session>'
+
+& $plink -shareexists -load $session
+if ($LASTEXITCODE -ne 0) {
+    throw 'SSH shared upstream is not available.'
+}
+
+& $plink -batch -load $session 'tail -n 200 ~/.kodi/temp/kodi.log'
+& $pscp -batch -load $session '<local-file>' '<host>:/home/<user>/<target>'
+```
+
+示例只使用占位符。不要把真实主机、用户名、Cookie、密码、私钥或会话令牌提交到
+公开仓库。
+
+## 已知限制
+
+- 最高画质受登录状态、账号权限、地区和源站实际 Representation 限制。
+- 直播间只有实际提供兼容 HEVC 2K/4K 时才能升档；高分辨率 AVC 会安全降级。
+- 高级脚本弹幕不转换。
+- B站风控响应可能要求稍后重试或重新登录；插件不会自动重试不可逆互动操作。
+- HDR 亮度映射由 Kodi、显示链路和电视共同决定，插件不会修改系统 HDR 配置。
+
+## 鸣谢
+
+- [Toad114514/plugin.video.bilikodiRe](https://github.com/Toad114514/plugin.video.bilikodiRe)
+- [chen310/plugin.video.bili](https://github.com/chen310/plugin.video.bili)
+- [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
+
+## 声明与许可
+
+本项目是非官方第三方客户端，仅供学习与个人使用，与哔哩哔哩官方无关，也未获得
+官方授权。请遵守相关服务条款并自行承担账号和网络风险。
+
+项目沿用上游的 [MIT License](LICENSE)。

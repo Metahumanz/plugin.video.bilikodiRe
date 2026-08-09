@@ -60,7 +60,7 @@
 	            </setting>
 	            <setting id="rec_history" type="boolean" label="30007">
 	               <level>0</level>
-	               <default>false</default>
+	               <default>true</default>
 	               <control type="toggle"/>
 	            </setting>
 	            <setting id="rec_home" type="boolean" label="30008">
@@ -137,10 +137,93 @@
 	    
 	    <category id="player_cate" label="30009" help="">
 	        <group id="1" label="30010">
-	            <setting id="stream_legacy_mode" type="boolean" label="30011">
-	               <level>0</level>
-	               <default>true</default>
-	               <control type="toggle"/>
+	            <setting id="video_quality" type="string" label="30200">
+	                <level>0</level>
+	                <default>highest</default>
+	                <constraints><options>
+	                    <option label="30201">auto</option>
+	                    <option label="30202">1080p</option>
+	                    <option label="30203">1080p60</option>
+	                    <option label="30204">4k</option>
+	                    <option label="30205">highest</option>
+	                </options></constraints>
+	                <control type="list" format="string"><heading>30200</heading></control>
+	            </setting>
+	            <setting id="video_codec" type="string" label="30206">
+	                <level>0</level>
+	                <default>hevc</default>
+	                <constraints><options>
+	                    <option label="30207">hevc</option>
+	                    <option label="30208">avc</option>
+	                </options></constraints>
+	                <control type="list" format="string"><heading>30206</heading></control>
+	            </setting>
+	            <setting id="allow_av1" type="boolean" label="30209">
+	                <level>0</level><default>false</default><control type="toggle"/>
+	            </setting>
+	            <setting id="auto_compatible" type="boolean" label="30210">
+	                <level>0</level><default>true</default><control type="toggle"/>
+	            </setting>
+	            <setting id="quality_fallback" type="boolean" label="30211">
+	                <level>0</level><default>true</default><control type="toggle"/>
+	            </setting>
+	        </group>
+	        <group id="2" label="30220">
+	            <setting id="danmaku_enabled" type="boolean" label="30221">
+	                <level>0</level><default>true</default><control type="toggle"/>
+	            </setting>
+	            <setting id="danmaku_font_size" type="integer" label="30222">
+	                <level>0</level><default>36</default>
+	                <constraints><minimum>12</minimum><step>1</step><maximum>100</maximum></constraints>
+	                <control type="slider" format="integer"><popup>false</popup></control>
+	            </setting>
+	            <setting id="danmaku_opacity" type="integer" label="30223">
+	                <level>0</level><default>85</default>
+	                <constraints><minimum>10</minimum><step>5</step><maximum>100</maximum></constraints>
+	                <control type="slider" format="percentage"><popup>false</popup></control>
+	            </setting>
+	            <setting id="danmaku_display_area" type="integer" label="30224">
+	                <level>0</level><default>50</default>
+	                <constraints><minimum>20</minimum><step>10</step><maximum>100</maximum></constraints>
+	                <control type="slider" format="percentage"><popup>false</popup></control>
+	            </setting>
+	            <setting id="danmaku_scroll" type="boolean" label="30225">
+	                <level>0</level><default>true</default><control type="toggle"/>
+	            </setting>
+	            <setting id="danmaku_top" type="boolean" label="30226">
+	                <level>0</level><default>true</default><control type="toggle"/>
+	            </setting>
+	            <setting id="danmaku_bottom" type="boolean" label="30227">
+	                <level>0</level><default>true</default><control type="toggle"/>
+	            </setting>
+	            <setting id="danmaku_avoid_overlap" type="boolean" label="30228" help="30229">
+	                <level>0</level><default>true</default><control type="toggle"/>
+	            </setting>
+	        </group>
+	        <group id="4" label="30232">
+	            <setting id="video_click_action" type="string" label="30233">
+	                <level>0</level>
+	                <default>detail</default>
+	                <constraints><options>
+	                    <option label="30234">detail</option>
+	                    <option label="30235">play</option>
+	                </options></constraints>
+	                <control type="list" format="string"><heading>30233</heading></control>
+	            </setting>
+	            <setting id="navigation_parent_back" type="boolean" label="30230" help="30231">
+	                <level>0</level>
+	                <default>true</default>
+	                <control type="toggle"/>
+	            </setting>
+	            <setting id="stop_video_on_home" type="boolean" label="30236" help="30237">
+	                <level>0</level>
+	                <default>true</default>
+	                <control type="toggle"/>
+	            </setting>
+	            <setting id="stop_video_on_back" type="boolean" label="30238" help="30239">
+	                <level>0</level>
+	                <default>true</default>
+	                <control type="toggle"/>
 	            </setting>
 	        </group>
 	    </category>

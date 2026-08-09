@@ -1,5 +1,5 @@
 # Get
-import json, time, os
+import html, json, re, time, os
 import requests as r
 import xbmcgui, xbmcvfs, xbmcaddon
 from xbmcswift2 import Plugin
@@ -12,15 +12,14 @@ addon_dir = xbmcvfs.translatePath(ADDON.getAddonInfo('path'))
 temp_dir = xbmcvfs.translatePath('special://temp/plugin.video.bilikodiRe/')
 
 heads = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Referer': 'https://www.bilibili.com/'
 }
 
 bili = Plugin()
 
 def init():
-    if not os.path.exists(temp_dir):
-        os.mkdir(temp_dir)
+    os.makedirs(temp_dir, exist_ok=True)
     srt.update_buvid()
 
 # 项目 icon/fanart/path 模板
@@ -29,6 +28,11 @@ def temp_item(a: dict):
     if not "path" in a:
         a["path"] = bili.url_for("passfunc")
     return a
+
+
+def clean_text(value):
+    """Remove Bilibili search highlight HTML from Kodi labels."""
+    return html.unescape(re.sub(r"<[^>]+>", "", str(value or ""))).strip()
 
 # 项目图库
 def get_image(s):
@@ -42,32 +46,92 @@ def get_image(s):
         case _:
             return ""
 
-def getjson(urlpath, urlbase="https://api.bilibili.com", params="", cookies=srt.get_cooks(), headers=heads):
-    #if isinstance(params, dict): parmas = ts.dict2url(parmas)
-    res = r.get(f"{urlbase}{urlpath}?{params}", cookies=cookies, headers=headers)
-    ts.log(f"param: {params}\ncallback: {res.text}")
-    try: raw = res.json()
-    except:
+def getjson(urlpath, urlbase="https://api.bilibili.com", params="", cookies=None, headers=heads):
+    if cookies is None:
+        cookies = srt.get_cooks()
+    try:
+        res = r.get(
+            f"{urlbase}{urlpath.rstrip('?')}",
+            params=params or None,
+            cookies=cookies,
+            headers=headers,
+            timeout=20
+        )
+        raw = res.json()
+    except (r.exceptions.RequestException, ValueError) as exc:
+        ts.err(f"GET {urlpath} failed: {exc}")
         xbmcgui.Dialog().ok("Error", "Json 解析失败，疑似返回的不是 Json")
         return
-    if raw["code"] != 0:
-        xbmcgui.Dialog().ok("请求失败", f"{raw['code']}: {raw['message']}")
+    ts.log(f"GET {urlpath}: HTTP {res.status_code}, code={raw.get('code')}")
+    if raw.get("code") != 0:
+        xbmcgui.Dialog().ok("请求失败", f"{raw.get('code')}: {raw.get('message', '未知错误')}")
         return 
-    if "v_voucher" in raw["data"]:
+    if isinstance(raw.get("data"), dict) and "v_voucher" in raw["data"]:
         xbmcgui.Dialog().ok("请求失败", f"接口返回了 v_voucher Captcha 验证")
         return
     return raw
 
-def postjson(urlpath, data, urlbase="https://api.bilibili.com", params="", cookies=srt.get_cooks(), headers=heads):
+def postjson(
+    urlpath,
+    data,
+    urlbase="https://api.bilibili.com",
+    params="",
+    cookies=None,
+    headers=heads,
+    warmup_url=None,
+):
     #if isinstance(params, dict): parmas = ts.dict2url(parmas)
-    res = r.post(f"{urlbase}{urlpath}?{params}", cookies=cookies, headers=headers, data=data)
-    ts.log(res.text)
-    try: raw = res.json()
-    except:
+    if cookies is None:
+        cookies = srt.get_cooks()
+    session = r.Session()
+    session.cookies.update(cookies)
+    try:
+        if warmup_url:
+            warmup = session.get(warmup_url, headers=headers, timeout=20)
+            warmup.raise_for_status()
+            # Bilibili's video page supplies the buvid3/b_nut web-session
+            # cookies that its mutation endpoints expect. Persist them across
+            # Kodi's short-lived plugin interpreter processes.
+            srt.merge_cookies(session.cookies.get_dict())
+        res = session.post(
+            f"{urlbase}{urlpath}?{params}",
+            headers=headers,
+            data=data,
+            timeout=20,
+        )
+        raw = res.json()
+    except (r.exceptions.RequestException, ValueError) as exc:
+        ts.err(f"POST {urlpath} failed: {exc}")
         xbmcgui.Dialog().ok("Error", "Json 解析失败，疑似返回的不是 Json")
         return
-    ts.log(res.text)
+    srt.merge_cookies(session.cookies.get_dict())
+    ts.log(
+        f"POST {urlpath}: HTTP {res.status_code}, code={raw.get('code')}, "
+        f"message={raw.get('message', '')}"
+    )
     return raw
+
+
+def interaction_headers(bvid):
+    """Headers used by the official web-origin video interaction requests."""
+    headers = dict(heads)
+    headers["Origin"] = "https://www.bilibili.com"
+    headers["Referer"] = "https://www.bilibili.com/video/{}/".format(bvid)
+    return headers
+
+
+def interaction_post(urlpath, data, bvid):
+    """Warm the web session once, then perform exactly one mutation request."""
+    payload = dict(data)
+    csrf = payload.get("csrf")
+    if csrf:
+        payload.setdefault("csrf_token", csrf)
+    return postjson(
+        urlpath,
+        payload,
+        headers=interaction_headers(bvid),
+        warmup_url="https://www.bilibili.com/video/{}/".format(bvid),
+    )
 
 # 记录历史
 def rec_history(bv, cid):
@@ -75,12 +139,13 @@ def rec_history(bv, cid):
     return postjson("/x/click-interface/web/heartbeat", {
        "bvid": bv,
        "cid": cid,
+       "played_time": 0,
        "csrf": srt.get_cookie_value("bili_jct")
     })
 
 ###$$$$$$##########
 # Default Video items back
-def get_viditem(v):
+def get_viditem(v, direct_play=None):
     i = {}
     context = []
     if v.get('attr', 0) != 0:
@@ -123,7 +188,7 @@ def get_viditem(v):
         bvid = v['history']['bvid']
 
     if 'title' in v:
-        title = v['title']
+        title = clean_text(v['title'])
 
     if 'cid' in v:
         cid = v['cid']
@@ -167,19 +232,27 @@ def get_viditem(v):
     if uname: info["director"] = uname
     if pubtime: info["date"] = pubtime
     if year: info["year"] = year
-    # Kodi context menu
-    context = [
-       ("点赞", f"Container.Update({bili.url_for('passfunc')}")
-    ]
+    if direct_play is None:
+        direct_play = ts.getSet("video_click_action") == "play"
+
+    play_url = bili.url_for("bvplay", bv=bvid, cid=cid)
+    detail_url = bili.url_for("video_detail", bv=bvid)
+    # Collection-like pages normally open details.  A favourites entry is an
+    # explicit video choice, so its caller can opt into one-click playback and
+    # keep details available from the context menu.
+    if direct_play:
+        context = [("视频详情", "Container.Update({})".format(detail_url))]
+    else:
+        context = [("立即播放", "PlayMedia({})".format(play_url))]
     if uname: context.append((f"跳转到 {uname}", f"Container.Update({bili.url_for('user_page', uid=mid)})"))
     i = {
        "label": title,
        "icon": pic,
        "fanart": pic,
-       "path": bili.url_for("bvplay", bv=bvid, cid=cid),
+       "path": play_url if direct_play else detail_url,
        "info": info,
        "context_menu": context,
-       "is_playable": True
+       "is_playable": bool(direct_play)
     }
     
     return i
@@ -269,7 +342,6 @@ def parse_duration(duration_text):
 def login_genqr():
     try:
         res = r.get("https://passport.bilibili.com/x/passport-login/web/qrcode/generate", headers=heads)
-        ts.log(res.text)
         res = res.json()
         ts.log(f"CreateQrcodeRequest: {res['code']}, {res['message']}")
     except:
@@ -312,27 +384,19 @@ def login_local():
         ts.err("Cookies Unavailable.")
         return False
     else:
-        ts.err(f"GetJson Error: {res['code']}: {res['message']}")
+        ts.err(f"GetJson Error: {resu['code']}: {resu['message']}")
         return False
 
 def check_login():
     cooks = srt.get_cooks()
     try:
-        re = r.get("https://api.bilibili.com/x/web-interface/nav/stat", headers=heads, cookies=cooks)
-        ts.log(f"Callback: {re.text}")
+        re = r.get("https://api.bilibili.com/x/web-interface/nav", headers=heads, cookies=cooks, timeout=20)
         resu = re.json()
     except:
         ts.err("RequestsIsNotAvailable")
         xbmcgui.Dialog().ok("Error", "无法获取登录状态")
         return
     # check code
-    if resu["code"] == 0:
-        ts.log("Cookies Available!")
-        return True
-    elif resu["code"] == -101:
-        ts.err("Cookies Unavailable.")
-        return False
-    else:
-        ts.err(f"GetJson Error: {res['code']}: {res['message']}")
-        return False
-    
+    logged_in = resu.get("code") == 0 and bool(resu.get("data", {}).get("isLogin"))
+    ts.log("Login status: {}".format("logged-in" if logged_in else "anonymous"))
+    return logged_in
