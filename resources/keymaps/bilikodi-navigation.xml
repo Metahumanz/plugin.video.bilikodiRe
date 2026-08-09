@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keymap>
+  <!--
+    Kodi's default Back action closes the Videos window on this CEC remote.
+    ParentDir is the same operation as selecting the visible ".." item.
+    In fullscreen playback, Back performs Kodi's native Stop action so video
+    never continues in the background after leaving the player.
+  -->
+  <Videos>
+    <remote>
+      <back>ParentDir</back>
+    </remote>
+    <keyboard>
+      <backspace>ParentDir</backspace>
+      <browser_back>ParentDir</browser_back>
+      <escape>ParentDir</escape>
+    </keyboard>
+  </Videos>
+  <FullscreenVideo>
+    <remote>
+      <back>Stop</back>
+    </remote>
+    <keyboard>
+      <backspace>Stop</backspace>
+      <browser_back>Stop</browser_back>
+      <escape>Stop</escape>
+    </keyboard>
+  </FullscreenVideo>
+</keymap>

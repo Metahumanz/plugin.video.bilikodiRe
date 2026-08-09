@@ -1,3 +1,4 @@
+import ast
 import json, os
 import requests as r
 
@@ -14,12 +15,28 @@ import urllib.parse
 bili = Plugin()
 
 def get_cooks():
-    # if ts.getSet("disable_login", bool): return {}
-    return bili.get_storage("user")["cookies"]
+    if ts.getSet("disable_login", bool):
+        return {}
+    user = bili.get_storage("user")
+    cookies = user.get("cookies", {})
+
+    # v1.0.33 accidentally stored QR-login cookies with str(dict).  Accept and
+    # migrate that value so existing users do not have to log in again.
+    if isinstance(cookies, str):
+        try:
+            cookies = ast.literal_eval(cookies)
+        except (SyntaxError, ValueError):
+            cookies = {}
+        if not isinstance(cookies, dict):
+            cookies = {}
+        user["cookies"] = cookies
+        user.sync()
+
+    return cookies if isinstance(cookies, dict) else {}
 
 def get_refkey():
     # if ts.getSet("disable_login", "bool"): return ""
-    return bili.get_storage("user")["refkey"]
+    return bili.get_storage("user").get("refkey", "")
 
 def get_cookie_value(key):
     cookie = get_cooks()
@@ -32,13 +49,29 @@ def set_cookie_value(key, v):
     cookie["cookies"][key] = v
     cookie.sync()
 
+
+def merge_cookies(values):
+    """Persist non-empty cookies learned from Bilibili web responses."""
+    if not isinstance(values, dict):
+        return False
+    current = dict(get_cooks())
+    changed = False
+    for key, value in values.items():
+        if value and current.get(key) != value:
+            current[key] = value
+            changed = True
+    if changed:
+        user = bili.get_storage("user")
+        user["cookies"] = current
+        user.sync()
+    return changed
+
 def get_uid():
     return get_cookie_value('DedeUserID') or '0'
 
 def update_buvid():
     if ts.getSet("priv_buvid", bool) == False: return
     res = r.get("https://api.bilibili.com/x/web-frontend/getbuvid")
-    ts.log(res.text)
     try:
         raw = res.json()
     except Exception:
@@ -103,4 +136,3 @@ def getwbikey(params):
         img_key=img_key,
         sub_key=sub_key
     )
-    
