@@ -115,14 +115,57 @@ def _ass_color(rgb):
     return "{:02X}{:02X}{:02X}".format(blue, green, red)
 
 
-def _pick_lane(lanes, start, reverse=False, allow_overlap=False):
+def _scroll_lane_available(state, candidate, screen_width):
+    """Check entry spacing and catch-up risk for two moving comments."""
+    if state is None or state["end"] <= candidate["start"]:
+        return True
+    if state["kind"] != "scroll" or state["direction"] != candidate["direction"]:
+        return False
+
+    elapsed = candidate["start"] - state["start"]
+    if elapsed < 0:
+        return False
+    previous_speed = (float(screen_width) + state["width"]) / state["duration"]
+    candidate_speed = (
+        float(screen_width) + candidate["width"]
+    ) / candidate["duration"]
+
+    # The preceding comment's trailing edge must have entered far enough for
+    # the next comment to appear at the screen boundary with a visible gap.
+    entry_gap = previous_speed * elapsed - state["width"]
+    if entry_gap < candidate["gap"]:
+        return False
+
+    # A longer following comment moves faster when duration is fixed. Ensure
+    # it cannot catch the previous one before the latter leaves the screen.
+    if candidate_speed > previous_speed:
+        remaining = max(0.0, state["end"] - candidate["start"])
+        closing_distance = (candidate_speed - previous_speed) * remaining
+        if entry_gap - candidate["gap"] < closing_distance:
+            return False
+    return True
+
+
+def _lane_available(state, candidate, screen_width):
+    if state is None or state["end"] <= candidate["start"]:
+        return True
+    if candidate["kind"] == "scroll":
+        return _scroll_lane_available(state, candidate, screen_width)
+    return False
+
+
+def _pick_lane(
+    lanes, candidate, screen_width, reverse=False, allow_overlap=False
+):
     indices = range(len(lanes) - 1, -1, -1) if reverse else range(len(lanes))
     for index in indices:
-        available_at = lanes[index]
-        if available_at <= start:
+        if _lane_available(lanes[index], candidate, screen_width):
             return index
     if allow_overlap:
-        return min(range(len(lanes)), key=lanes.__getitem__)
+        return min(
+            range(len(lanes)),
+            key=lambda index: lanes[index]["end"] if lanes[index] else 0.0,
+        )
     return None
 
 
@@ -146,7 +189,7 @@ def generate_ass(
     lane_count = max(1, area_height // line_height)
     # All comment modes share absolute visual rows. This prevents a fixed
     # comment from occupying the same area as a scrolling comment.
-    lanes = [0.0] * lane_count
+    lanes = [None] * lane_count
     alpha = int(round(255 * (1.0 - max(0.0, min(1.0, float(opacity))))))
 
     lines = [
@@ -184,12 +227,23 @@ def generate_ass(
 
         if mode in (1, 2, 3, 6) and scroll:
             duration = float(scroll_duration)
-            lane = _pick_lane(lanes, start, allow_overlap=not avoid_overlap)
+            estimated_width = max(size, len(comment["text"]) * size)
+            candidate = {
+                "kind": "scroll",
+                "start": start,
+                "end": start + duration,
+                "duration": duration,
+                "width": estimated_width,
+                "direction": "ltr" if mode == 6 else "rtl",
+                "gap": max(12.0, size * 0.35),
+            }
+            lane = _pick_lane(
+                lanes, candidate, width, allow_overlap=not avoid_overlap
+            )
             if lane is None:
                 continue
-            lanes[lane] = start + duration
+            lanes[lane] = candidate
             y = 10 + lane * line_height
-            estimated_width = max(size, len(comment["text"]) * size)
             if mode == 6:
                 movement = "\\move({:.0f},{},{},{},0,{:.0f})".format(
                     -estimated_width, y, width, y, duration * 1000
@@ -200,19 +254,27 @@ def generate_ass(
                 )
         elif mode == 5 and top:
             duration = float(still_duration)
-            lane = _pick_lane(lanes, start, allow_overlap=not avoid_overlap)
-            if lane is None:
-                continue
-            lanes[lane] = start + duration
-            movement = "\\an8\\pos({},{})".format(width // 2, 10 + lane * line_height)
-        elif mode == 4 and bottom:
-            duration = float(still_duration)
+            candidate = {"kind": "fixed", "start": start, "end": start + duration}
             lane = _pick_lane(
-                lanes, start, reverse=True, allow_overlap=not avoid_overlap
+                lanes, candidate, width, allow_overlap=not avoid_overlap
             )
             if lane is None:
                 continue
-            lanes[lane] = start + duration
+            lanes[lane] = candidate
+            movement = "\\an8\\pos({},{})".format(width // 2, 10 + lane * line_height)
+        elif mode == 4 and bottom:
+            duration = float(still_duration)
+            candidate = {"kind": "fixed", "start": start, "end": start + duration}
+            lane = _pick_lane(
+                lanes,
+                candidate,
+                width,
+                reverse=True,
+                allow_overlap=not avoid_overlap,
+            )
+            if lane is None:
+                continue
+            lanes[lane] = candidate
             movement = "\\an2\\pos({},{})".format(
                 width // 2, min(area_height, 10 + (lane + 1) * line_height)
             )
@@ -235,11 +297,19 @@ def prepare_danmaku(cid, temp_dir, addon, cookies=None):
     xml_data = fetch_danmaku_xml(cid, cookies=cookies)
     comments = parse_danmaku(xml_data)
     ass = generate_ass(comments, **settings)
-    os.makedirs(temp_dir, exist_ok=True)
-    safe_cid = "".join(char for char in str(cid) if char.isalnum() or char in ("-", "_"))
-    path = os.path.join(temp_dir, "{}.ass".format(safe_cid or "danmaku"))
-    with open(path, "w", encoding="utf-8-sig", newline="\n") as subtitle:
+    safe_cid = "".join(
+        char for char in str(cid) if char.isalnum() or char in ("-", "_")
+    ) or "unknown"
+    output_dir = os.path.join(temp_dir, "bilibili-danmaku", safe_cid)
+    os.makedirs(output_dir, exist_ok=True)
+    # A descriptive, language-tagged filename gives Kodi a stable stream name
+    # and lets it reselect this first Chinese track after an ISA stream reset.
+    # The previous numeric-only filename appeared as an unnamed/unknown track.
+    path = os.path.join(output_dir, "Bilibili Danmaku.zh.ass")
+    temporary = path + ".tmp"
+    with open(temporary, "w", encoding="utf-8-sig", newline="\n") as subtitle:
         subtitle.write(ass)
+    os.replace(temporary, path)
     return path
 
 

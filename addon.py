@@ -13,9 +13,14 @@ import core.secret as srt
 from resources.lib.playback.dash import (
     DashPlaybackError,
     ManifestServerError,
+    attach_subtitles,
     play_dash,
 )
 from resources.lib.playback.danmaku import DanmakuError, prepare_danmaku
+from resources.lib.playback.subtitles import (
+    BilibiliSubtitleError,
+    prepare_bilibili_subtitles,
+)
 from resources.lib.playback.live import (
     LivePlaybackError,
     PI4_LIVE_MAX_QN,
@@ -26,7 +31,7 @@ from resources.lib.playback.progress import write_playback_context
 from resources.lib.playback.settings import playback_settings
 from resources.lib.dynamic_feed import normalize_dynamic
 # xbmcswift (新的我们使用了这个78来构建我们的菜单）
-from xbmcswift2 import Plugin, xbmc, xbmcplugin, xbmcvfs, xbmcgui, xbmcaddon
+from xbmcswift2 import ListItem, Plugin, xbmc, xbmcplugin, xbmcvfs, xbmcgui, xbmcaddon
 
 try:
     xbmc.translatePath = xbmcvfs.translatePath
@@ -36,7 +41,7 @@ except AttributeError:
 bili = c.bili
 
 # version
-version = "v1.5.0"
+version = "v1.5.4"
 debug = True
 
 # passfunc
@@ -1149,11 +1154,34 @@ def _resolve_playback(bv, cid, ep_id=None):
     )
 
     cookies = srt.get_cooks()
-    subtitles = None
+    danmaku_subtitle = None
     try:
-        subtitles = prepare_danmaku(cid, c.temp_dir, xbmcaddon.Addon(), cookies=cookies)
+        danmaku_subtitle = prepare_danmaku(
+            cid, c.temp_dir, xbmcaddon.Addon(), cookies=cookies
+        )
     except (DanmakuError, OSError, ValueError) as exc:
         ts.err("Danmaku disabled for this playback: {}".format(exc))
+
+    official_subtitles = []
+    try:
+        official_subtitles = prepare_bilibili_subtitles(
+            bv,
+            cid,
+            c.temp_dir,
+            xbmcaddon.Addon(),
+            cookies=cookies,
+            danmaku_path=danmaku_subtitle,
+            wbi_signer=srt.getwbikey,
+        )
+    except (BilibiliSubtitleError, OSError, ValueError) as exc:
+        ts.err("Bilibili official subtitles unavailable: {}".format(exc))
+    ts.log(
+        "Subtitle tracks prepared: official={} danmaku={}".format(
+            len(official_subtitles), bool(danmaku_subtitle)
+        )
+    )
+    subtitles = ([danmaku_subtitle] if danmaku_subtitle else []) + official_subtitles
+    subtitles = subtitles or None
 
     write_playback_context(c.temp_dir, bv, cid)
 
@@ -1194,7 +1222,9 @@ def _resolve_playback(bv, cid, ep_id=None):
     # or unusual videos that do not expose DASH at all.
     if resu.get("durl"):
         c.rec_history(bv, cid)
-        bili.set_resolved_url(resu["durl"][0]["url"], subtitles=subtitles)
+        item = ListItem(path=resu["durl"][0]["url"], offscreen=True)
+        attach_subtitles(item.as_xbmc_listitem(), subtitles)
+        bili.set_resolved_url(item)
         return
 
     xbmcgui.Dialog().ok("播放失败", "playurl 未返回 DASH 或 MP4 播放地址")

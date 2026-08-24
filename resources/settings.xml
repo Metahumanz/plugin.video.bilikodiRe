@@ -200,6 +200,22 @@
 	                <level>0</level><default>true</default><control type="toggle"/>
 	            </setting>
 	        </group>
+	        <group id="3" label="30240">
+	            <setting id="bili_subtitle_enabled" type="boolean" label="30241" help="30242">
+	                <level>0</level><default>true</default><control type="toggle"/>
+	            </setting>
+	            <setting id="bili_subtitle_language" type="string" label="30243">
+	                <level>0</level>
+	                <default>auto</default>
+	                <constraints><options>
+	                    <option label="30244">auto</option>
+	                    <option label="30245">zh-hans</option>
+	                    <option label="30246">zh-hant</option>
+	                    <option label="30247">en</option>
+	                </options></constraints>
+	                <control type="list" format="string"><heading>30243</heading></control>
+	            </setting>
+	        </group>
 	        <group id="4" label="30232">
 	            <setting id="video_click_action" type="string" label="30233">
 	                <level>0</level>

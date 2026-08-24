@@ -176,6 +176,19 @@ def write_mpd(mpd, temp_dir, cid):
     return path
 
 
+def attach_subtitles(kodi_item, subtitles):
+    """Attach one or more local subtitle tracks to a native Kodi ListItem."""
+    if not subtitles:
+        return []
+    if isinstance(subtitles, (str, bytes, os.PathLike)):
+        paths = [os.fspath(subtitles)]
+    else:
+        paths = [os.fspath(path) for path in subtitles if path]
+    if paths:
+        kodi_item.setSubtitles(paths)
+    return paths
+
+
 def play_dash(
     dash,
     temp_dir,
@@ -216,7 +229,8 @@ def play_dash(
         "inputstream.adaptive.stream_headers",
         build_stream_headers(cookies=cookies),
     )
-    plugin.set_resolved_url(item, subtitles=subtitles)
+    attach_subtitles(kodi_item, subtitles)
+    plugin.set_resolved_url(item)
     return {
         "mpd_path": mpd_path,
         "video": video,
@@ -232,6 +246,7 @@ __all__ = [
     "DashPlaybackError",
     "ManifestServerError",
     "build_stream_headers",
+    "attach_subtitles",
     "generate_mpd",
     "play_dash",
     "select_audio_stream",

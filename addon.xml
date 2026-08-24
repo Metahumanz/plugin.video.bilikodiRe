@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.bilikodiRe" name="bilikodi Reborn" version="1.5.0" provider-name="toadXtech64-Evolution">
+<addon id="plugin.video.bilikodiRe" name="bilikodi Reborn" version="1.5.4" provider-name="toadXtech64-Evolution">
   <requires>
     <import addon="xbmc.python" version="3.0.1"/>
     <import addon="script.module.requests" version="2.12.4"/>
@@ -40,7 +40,20 @@ Should support Kodi 19/20/21/22
 本插件与哔哩哔哩官方无任何联系，也没有受到哔哩哔哩官方的授权。
 本插件仅供学习参考使用，本插件不会通过任何手段收集你的信息。
     </disclaimer>
-  <news>
+    <news>
+- v1.5.4
+ 修复旧播放器字幕接口在登录会话下随机返回其他视频字幕：先校验 BVID/CID 归属，再强制使用 WBI 签名接口；校验或签名失败时不加载可疑字幕
+ 每次刷新当前视频字幕前清理该 CID 的旧生成轨道，避免播放器缓存误用残留文件
+- v1.5.3
+ 恢复 Kodi 原生 ASS 弹幕渲染样式
+ 每条官方字幕都合并当前视频的原生 ASS 弹幕，切换字幕不再丢失弹幕
+ 官方字幕使用 B站 lan_doc 原始名称，并按视频 cid 与字幕轨道隔离本地文件，修复跨视频串字幕
+- v1.5.2
+ 修复 InputStream Adaptive 重置后从弹幕自动切到官方字幕，普通弹幕不再十几秒后消失
+ 为弹幕、人工字幕和 AI 字幕提供可识别名称，并正确映射 ai-zh/ai-en 语言码
+- v1.5.1
+ 新增 B站 CC/AI 官方字幕抓取，转换为本地 SRT 并与弹幕共同加入 Kodi 字幕列表
+ 修复防重叠模式把滚动弹幕整段独占一行；现在按入场间距和追尾轨迹复用同一行
 - v1.5.0
  Kodi 21 / Raspberry Pi 4 原生 DASH 播放层，HEVC 优先、AV1 默认禁用
  “最高”画质支持 qn=125 HEVC Main10 HDR，并限制到 Pi4 兼容帧率

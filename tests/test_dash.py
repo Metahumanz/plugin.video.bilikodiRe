@@ -97,6 +97,7 @@ class DashTests(unittest.TestCase):
             def __init__(self, path):
                 self.path = path
                 self.properties = {}
+                self.subtitles = []
 
             def setMimeType(self, value):
                 self.mime_type = value
@@ -106,6 +107,9 @@ class DashTests(unittest.TestCase):
 
             def setProperty(self, name, value):
                 self.properties[name] = value
+
+            def setSubtitles(self, paths):
+                self.subtitles = list(paths)
 
         class SwiftListItem:
             def __init__(self, path, offscreen=False):
@@ -141,7 +145,7 @@ class DashTests(unittest.TestCase):
                 with patch.dict("sys.modules", {"xbmcswift2": xbmcswift2}):
                     result = play_dash(
                         sample_dash(), temp_dir, 12345, plugin=plugin,
-                        subtitles="/tmp/comments.ass"
+                        subtitles=["/tmp/comments.ass", "/tmp/official.zh.srt"]
                     )
                 self.assertTrue(os.path.exists(result["mpd_path"]))
                 self.assertEqual("sdr", result["dynamic_range"])
@@ -162,7 +166,10 @@ class DashTests(unittest.TestCase):
         self.assertFalse(kodi_item.content_lookup)
         self.assertEqual("inputstream.adaptive", kodi_item.properties["inputstream"])
         self.assertNotIn("inputstream.adaptive.manifest_type", kodi_item.properties)
-        self.assertEqual("/tmp/comments.ass", captured["subtitles"])
+        self.assertIsNone(captured["subtitles"])
+        self.assertEqual(
+            ["/tmp/comments.ass", "/tmp/official.zh.srt"], kodi_item.subtitles
+        )
 
 
 if __name__ == "__main__":

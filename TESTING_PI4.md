@@ -1,6 +1,6 @@
 # Raspberry Pi 4 / Kodi 21 验收步骤
 
-验证插件浏览、Bilibili DASH、InputStream Adaptive、HEVC 选流、ASS 弹幕、
+验证插件浏览、Bilibili DASH、InputStream Adaptive、HEVC 选流、官方字幕合成 ASS、原生弹幕、
 播放进度，以及 Kodi 已有的 Pi 4 硬件解码与 DRM/KMS 输出。不要修改 Kodi、
 FFmpeg、DRM/KMS 或 mpv 配置。
 
@@ -26,6 +26,11 @@ FFmpeg、DRM/KMS 或 mpv 配置。
 - 返回键退出播放器后回到原插件页面；
 - Kodi 原生播放器 OSD 和遥控器操作正常。
 - 开启弹幕后，Kodi 日志出现 `CDVDSubtitlesLibass` 且弹幕可见；
+- 选择一个在 B站网页端确有 CC/AI 字幕的视频，Kodi 字幕列表应出现弹幕轨道，
+  以及以 B站 `lan_doc` 命名的官方字幕轨道；选择任一官方字幕后弹幕仍应显示；
+- 连续播放两个 `cid` 不同的视频，第二个视频不得显示第一个视频的字幕或弹幕；
+- 对 B站网页端没有字幕的视频，插件只能保留弹幕轨道，不能出现其他视频的 CC/AI
+  字幕；字幕身份校验或 WBI 签名失败时也必须如此；
 - 开启播放历史后，日志出现 `playback progress ... result=True`。
 
 播放期间通过 SSH 查看插件选择结果：
@@ -38,6 +43,7 @@ grep -E "MPD service|DASH selected|inputstream.adaptive" ~/.kodi/temp/kodi.log |
 
 ```text
 MPD service listening on 127.0.0.1:<随机端口>
+Subtitle tracks prepared: official=1 danmaku=True
 DASH selected: qn=125 range=hdr codec=hevc 3840x2160 fps=60.0 ...
 ```
 
@@ -96,6 +102,8 @@ top -p "$(pidof kodi.bin)"
   不会把 AVC 或 AV1 当作 `qn=125` HDR 交给 Pi4。
 - `fuser` 看不到 `kodi.bin`：确认播放仍在进行且日志实际选择了 HEVC，再检查正确的
   video device；不要因此修改已验证正常的 Kodi/DRM 配置。
+- `official=0`：先确认插件登录状态有效，并在 B站网页端确认当前分P确实提供字幕；
+  官方字幕属于具体 `cid`，不同分P可能不同。
 
 ## 5. 直播画质与弹幕
 
