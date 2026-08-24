@@ -454,3 +454,11 @@ msgstr "繁体中文"
 msgctxt "#30247"
 msgid "English"
 msgstr "英语"
+
+msgctxt "#30248"
+msgid "Official subtitle font size"
+msgstr "官方字幕字号"
+
+msgctxt "#30249"
+msgid "Changes the font size of Bilibili official subtitle tracks. Takes effect on the next playback."
+msgstr "调整 B站官方字幕轨道的字号；下次播放时生效。"

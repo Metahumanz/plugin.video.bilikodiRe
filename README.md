@@ -96,7 +96,7 @@ BV/aid → cid → playurl API → dash.video[] / dash.audio[]
 | 画质 | 最高/4K/1080P60/1080P/720P | 有权限时使用“最高” |
 | 编码 | HEVC/AVC | Pi 4 使用 HEVC |
 | AV1 | 是否允许 | Pi 4 关闭 |
-| 官方字幕 | 自动获取、首选语言 | 开启，简体中文优先 |
+| 官方字幕 | 自动获取、首选语言、字号 | 开启，简体中文优先，字号 42 |
 | 弹幕 | 字号、透明度、区域、类型、防重叠 | 按电视观看距离调整 |
 | 导航 | 列表返回、全屏返回、回主页停止 | 遥控器环境建议开启 |
 | 视频点击 | 详情页/直接播放 | 任选，所有视频列表统一生效 |
@@ -110,7 +110,7 @@ resources/lib/playback/
 ├── stream_selector.py   # DASH 画质与编码选择
 ├── dash.py              # MPD 与 Kodi resolved URL
 ├── manifest_server.py   # 本地临时 MPD 服务
-├── subtitles.py         # B站官方字幕 JSON → SRT / 弹幕合成 ASS
+├── subtitles.py         # B站官方字幕 JSON → ASS / 弹幕合成 ASS
 ├── danmaku.py           # 普通视频 ASS 弹幕
 ├── live.py              # 直播选流
 ├── live_danmaku.py      # 直播 WebSocket 与轮换 ASS

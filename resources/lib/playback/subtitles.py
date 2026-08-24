@@ -29,6 +29,14 @@ def _setting_bool(addon, setting_id, default):
     return value.lower() == "true"
 
 
+def _setting_number(addon, setting_id, default, minimum, maximum):
+    try:
+        value = float(addon.getSetting(setting_id))
+    except (TypeError, ValueError):
+        value = float(default)
+    return max(float(minimum), min(float(maximum), value))
+
+
 def subtitle_settings(addon):
     preference = (addon.getSetting("bili_subtitle_language") or "auto").lower()
     if preference not in VALID_LANGUAGE_PREFERENCES:
@@ -36,6 +44,7 @@ def subtitle_settings(addon):
     return {
         "enabled": _setting_bool(addon, "bili_subtitle_enabled", True),
         "language": preference,
+        "font_size": _setting_number(addon, "bili_subtitle_font_size", 42, 16, 96),
     }
 
 
@@ -276,17 +285,49 @@ def _ass_text(value):
     )
 
 
-def subtitle_json_to_ass(payload, danmaku_ass):
-    """Add one official subtitle track to an existing native danmaku ASS."""
+def _official_subtitle_style(font_size):
+    size = max(16.0, min(96.0, float(font_size)))
+    return (
+        "Style: BilibiliSubtitle,Arial,{:.0f},&H00FFFFFF,&H00FFFFFF,&H00000000,"
+        "&H64000000,0,0,0,0,100,100,0,0,1,2.5,0,2,60,60,48,1"
+    ).format(size)
+
+
+def _standalone_ass(font_size):
+    return "\n".join(
+        [
+            "[Script Info]",
+            "ScriptType: v4.00+",
+            "PlayResX: 1920",
+            "PlayResY: 1080",
+            "WrapStyle: 2",
+            "ScaledBorderAndShadow: yes",
+            "",
+            "[V4+ Styles]",
+            "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, "
+            "OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, "
+            "ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, "
+            "Alignment, MarginL, MarginR, MarginV, Encoding",
+            _official_subtitle_style(font_size),
+            "",
+            "[Events]",
+            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, "
+            "Effect, Text",
+        ]
+    ) + "\n"
+
+
+def subtitle_json_to_ass(payload, danmaku_ass=None, font_size=42):
+    """Render an official subtitle as ASS, optionally extending danmaku ASS."""
     document = str(danmaku_ass or "").lstrip("\ufeff")
     marker = "[Events]"
-    if marker not in document:
-        raise BilibiliSubtitleError("弹幕 ASS 缺少 Events 段")
-    style = (
-        "Style: BilibiliSubtitle,Arial,42,&H00FFFFFF,&H00FFFFFF,&H00000000,"
-        "&H64000000,0,0,0,0,100,100,0,0,1,2.5,0,2,60,60,48,1\n\n"
-    )
-    document = document.replace(marker, style + marker, 1).rstrip() + "\n"
+    if document:
+        if marker not in document:
+            raise BilibiliSubtitleError("弹幕 ASS 缺少 Events 段")
+        style = _official_subtitle_style(font_size) + "\n\n"
+        document = document.replace(marker, style + marker, 1).rstrip() + "\n"
+    else:
+        document = _standalone_ass(font_size)
     for start, end, text in _subtitle_cues(payload):
         document += "Dialogue: 5,{},{},BilibiliSubtitle,,0,0,0,,{}\n".format(
             _ass_time(start), _ass_time(end), _ass_text(text)
@@ -391,8 +432,21 @@ def write_subtitle_srt(payload, temp_dir, cid, track, ordinal=0):
     return path
 
 
+def write_subtitle_ass(payload, temp_dir, cid, track, font_size=42, ordinal=0):
+    language = _filename_language(track.get("language"))
+    filename = "{}.{}.ass".format(_track_name(track), language)
+    path = os.path.join(
+        _track_output_dir(temp_dir, cid, track, ordinal), filename
+    )
+    temporary = path + ".tmp"
+    with open(temporary, "w", encoding="utf-8-sig", newline="\n") as output:
+        output.write(subtitle_json_to_ass(payload, font_size=font_size))
+    os.replace(temporary, path)
+    return path
+
+
 def write_subtitle_with_danmaku(
-    payload, temp_dir, cid, track, danmaku_path, ordinal=0
+    payload, temp_dir, cid, track, danmaku_path, ordinal=0, font_size=42
 ):
     language = _filename_language(track.get("language"))
     filename = "{}.{}.ass".format(_track_name(track), language)
@@ -400,7 +454,9 @@ def write_subtitle_with_danmaku(
         _track_output_dir(temp_dir, cid, track, ordinal), filename
     )
     with open(danmaku_path, encoding="utf-8-sig") as source:
-        combined = subtitle_json_to_ass(payload, source.read())
+        combined = subtitle_json_to_ass(
+            payload, source.read(), font_size=font_size
+        )
     temporary = path + ".tmp"
     with open(temporary, "w", encoding="utf-8-sig", newline="\n") as output:
         output.write(combined)
@@ -417,7 +473,7 @@ def prepare_bilibili_subtitles(
     danmaku_path=None,
     wbi_signer=None,
 ):
-    """Download available official tracks and return ordered local SRT paths."""
+    """Download available official tracks and return ordered local ASS paths."""
     settings = subtitle_settings(addon)
     if not settings["enabled"]:
         return []
@@ -440,11 +496,19 @@ def prepare_bilibili_subtitles(
                         track,
                         danmaku_path,
                         ordinal,
+                        settings["font_size"],
                     )
                 )
             else:
                 paths.append(
-                    write_subtitle_srt(payload, temp_dir, cid, track, ordinal)
+                    write_subtitle_ass(
+                        payload,
+                        temp_dir,
+                        cid,
+                        track,
+                        settings["font_size"],
+                        ordinal,
+                    )
                 )
         except (BilibiliSubtitleError, OSError):
             # A single expired/removed language must not discard other tracks.
@@ -464,6 +528,7 @@ __all__ = [
     "subtitle_json_to_ass",
     "subtitle_json_to_srt",
     "subtitle_settings",
+    "write_subtitle_ass",
     "write_subtitle_srt",
     "write_subtitle_with_danmaku",
 ]

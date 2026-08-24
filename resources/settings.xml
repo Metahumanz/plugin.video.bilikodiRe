@@ -215,6 +215,11 @@
 	                </options></constraints>
 	                <control type="list" format="string"><heading>30243</heading></control>
 	            </setting>
+	            <setting id="bili_subtitle_font_size" type="integer" label="30248" help="30249">
+	                <level>0</level><default>42</default>
+	                <constraints><minimum>16</minimum><step>1</step><maximum>96</maximum></constraints>
+	                <control type="slider" format="integer"><popup>false</popup></control>
+	            </setting>
 	        </group>
 	        <group id="4" label="30232">
 	            <setting id="video_click_action" type="string" label="30233">

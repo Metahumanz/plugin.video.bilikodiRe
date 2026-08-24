@@ -29,6 +29,7 @@ class AddonManifestTests(unittest.TestCase):
         self.assertEqual("false", defaults["allow_av1"])
         self.assertEqual("true", defaults["danmaku_enabled"])
         self.assertEqual("true", defaults["danmaku_avoid_overlap"])
+        self.assertEqual("42", defaults["bili_subtitle_font_size"])
         self.assertEqual("true", defaults["rec_history"])
         self.assertEqual("true", defaults["stop_video_on_home"])
         self.assertEqual("true", defaults["stop_video_on_back"])

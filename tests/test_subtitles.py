@@ -9,6 +9,7 @@ from resources.lib.playback.subtitles import (
     prepare_bilibili_subtitles,
     subtitle_json_to_ass,
     subtitle_json_to_srt,
+    subtitle_settings,
 )
 
 
@@ -61,6 +62,27 @@ class BilibiliSubtitleTests(unittest.TestCase):
         self.assertIn("Tom & Jerry", srt)
         self.assertNotIn("invalid", srt)
         self.assertEqual(2, srt.count(" --> "))
+
+    def test_subtitle_settings_read_and_clamp_font_size(self):
+        settings = subtitle_settings(
+            FakeAddon(
+                {
+                    "bili_subtitle_enabled": "true",
+                    "bili_subtitle_language": "zh-hans",
+                    "bili_subtitle_font_size": "120",
+                }
+            )
+        )
+        self.assertTrue(settings["enabled"])
+        self.assertEqual("zh-hans", settings["language"])
+        self.assertEqual(96, settings["font_size"])
+
+    def test_standalone_official_ass_uses_configured_font_size(self):
+        ass = subtitle_json_to_ass(SAMPLE_SUBTITLE, font_size=64)
+        self.assertIn("[V4+ Styles]", ass)
+        self.assertIn("Style: BilibiliSubtitle,Arial,64,", ass)
+        self.assertIn("[Events]", ass)
+        self.assertEqual(2, ass.count("Dialogue:"))
 
     def test_player_api_uses_cookies_and_protocol_relative_urls(self):
         payload = {
@@ -169,7 +191,7 @@ class BilibiliSubtitleTests(unittest.TestCase):
             paths = prepare_bilibili_subtitles(
                 "BV-test", 456, temp_dir, FakeAddon()
             )
-            self.assertEqual("中文（自动生成）.zh.srt", os.path.basename(paths[0]))
+            self.assertEqual("中文（自动生成）.zh.ass", os.path.basename(paths[0]))
             self.assertEqual(
                 os.path.join("bilibili-subtitles", "456", "ai"),
                 os.path.relpath(os.path.dirname(paths[0]), temp_dir),
@@ -201,16 +223,21 @@ class BilibiliSubtitleTests(unittest.TestCase):
                 return_value=SAMPLE_SUBTITLE,
             ):
                 paths = prepare_bilibili_subtitles(
-                    "BV-test", 456, temp_dir, FakeAddon()
+                    "BV-test",
+                    456,
+                    temp_dir,
+                    FakeAddon({"bili_subtitle_font_size": "64"}),
                 )
 
             self.assertEqual(2, len(paths))
-            self.assertEqual("中文.zh.srt", os.path.basename(paths[0]))
-            self.assertEqual("English.en.srt", os.path.basename(paths[1]))
+            self.assertEqual("中文.zh.ass", os.path.basename(paths[0]))
+            self.assertEqual("English.en.ass", os.path.basename(paths[1]))
             for path in paths:
                 self.assertTrue(os.path.isfile(path))
                 with open(path, "r", encoding="utf-8-sig") as subtitle_file:
-                    self.assertEqual(2, subtitle_file.read().count(" --> "))
+                    rendered = subtitle_file.read()
+                self.assertIn("Style: BilibiliSubtitle,Arial,64,", rendered)
+                self.assertEqual(2, rendered.count("Dialogue:"))
 
     def test_official_track_keeps_native_danmaku_ass(self):
         danmaku = """[Script Info]
