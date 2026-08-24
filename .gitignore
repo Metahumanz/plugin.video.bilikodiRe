@@ -6,3 +6,4 @@ dist/
 *.log
 artifacts/
 .pytest_cache/
+raspberry-tv-connection/

@@ -30,8 +30,15 @@ BV/aid → cid → playurl API → dash.video[] / dash.audio[]
 ### 弹幕与直播
 
 - 普通视频弹幕由 B站 XML 转换成 Kodi 原生 ASS 外挂字幕。
+- 登录后自动获取视频可用的 B站 CC/AI 官方字幕；每条官方字幕都与当前视频的
+  原生 ASS 弹幕合成一个可选轨道，菜单名称直接使用 B站返回的字幕名称。
+- 弹幕和官方字幕按 `cid`、字幕轨道分别存放，不复用其他视频的本地字幕路径。
+- 官方字幕先校验 `BVID/CID` 归属，再通过 WBI 签名播放器接口获取；不回退到会
+  返回错误缓存轨道的旧字幕接口。
+- 每次刷新字幕只清理当前 `cid` 的旧生成轨道，避免残留文件被播放器缓存复用。
 - 直播弹幕通过 B站 WebSocket 实时接收并转换成轮换 ASS 字幕。
-- 字号、透明度、显示区域、弹幕类型和跨类型防重叠轨道可配置。
+- 字号、透明度、显示区域、弹幕类型和跨类型防重叠轨道可配置；滚动弹幕按屏幕
+  轨迹复用行，只要保持间距且不会追尾，同一行可同时显示多条。
 - 直播最高请求 `qn=20000`；2K/4K 只选择 HEVC，遇到高分辨率 AVC 或 AV1 时
   自动降级到 Pi 4 安全画质。
 - 直播弹幕连接支持心跳和重连，长时间播放不会因临时识别上下文过期而停止。
@@ -74,6 +81,14 @@ BV/aid → cid → playurl API → dash.video[] / dash.audio[]
 完整的 DASH、硬解、DRM/KMS、直播和互动验收步骤见
 [TESTING_PI4.md](TESTING_PI4.md)。
 
+## 文档导航
+
+- [架构说明](docs/ARCHITECTURE.md)：播放链、模块边界、字幕/弹幕和 service 生命周期。
+- [工程经验与故障记录](docs/ENGINEERING_NOTES.md)：WBI 字幕串台、Kodi 字幕模型、
+  弹幕轨道、登录存储和 PuTTY 共享连接经验。
+- [Raspberry Pi 4 / Kodi 21 验收步骤](TESTING_PI4.md)：功能、硬解、直播和互动验证。
+- [自动化协作规则](AGENTS.md)：仓库边界、安全、测试和部署要求。
+
 ## 设置说明
 
 | 分类 | 主要选项 | 建议值 |
@@ -81,6 +96,7 @@ BV/aid → cid → playurl API → dash.video[] / dash.audio[]
 | 画质 | 最高/4K/1080P60/1080P/720P | 有权限时使用“最高” |
 | 编码 | HEVC/AVC | Pi 4 使用 HEVC |
 | AV1 | 是否允许 | Pi 4 关闭 |
+| 官方字幕 | 自动获取、首选语言 | 开启，简体中文优先 |
 | 弹幕 | 字号、透明度、区域、类型、防重叠 | 按电视观看距离调整 |
 | 导航 | 列表返回、全屏返回、回主页停止 | 遥控器环境建议开启 |
 | 视频点击 | 详情页/直接播放 | 任选，所有视频列表统一生效 |
@@ -94,6 +110,7 @@ resources/lib/playback/
 ├── stream_selector.py   # DASH 画质与编码选择
 ├── dash.py              # MPD 与 Kodi resolved URL
 ├── manifest_server.py   # 本地临时 MPD 服务
+├── subtitles.py         # B站官方字幕 JSON → SRT / 弹幕合成 ASS
 ├── danmaku.py           # 普通视频 ASS 弹幕
 ├── live.py              # 直播选流
 ├── live_danmaku.py      # 直播 WebSocket 与轮换 ASS
